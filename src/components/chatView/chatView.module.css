@@ -1,0 +1,17 @@
+.chatViewContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 50%;
+  background: #ededed;
+  overflow: hidden;
+}
+
+.conversationContainer {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px;
+  border-radius: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #222;
+}
