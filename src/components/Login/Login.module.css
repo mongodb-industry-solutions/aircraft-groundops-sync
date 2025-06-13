@@ -56,11 +56,42 @@
     margin: 10px;
 }
 
+.customModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 32, 34, 0.65);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+.customModalBox {
+    width: 50%;
+    height: 75%;
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+    overflow: auto;
+}
 
 @media (max-width: 767.98px) {
 
     .leafyFeel :global(.modal-content) {
         border-radius: 0px;
+    }
+
+    .customModalBox {
+        width: 98vw;
+        height: 98vh;
+        border-radius: 0;
     }
 }
