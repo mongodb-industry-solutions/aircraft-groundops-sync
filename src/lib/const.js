@@ -1,12 +1,16 @@
 export const DEFAULT_GREETINGS = {
   sender: "assistant",
-  text: "Hi! I'm leafy how can I help you today?",
+  text: "Hi! I'm Leafy, I'll help you with your Ground Ops today",
 };
 
 export const SAMPLE_CONVERSATION = [
   {
     sender: "assistant",
-    text: "Hi, I'm Leafy. How can I help you today?",
+    text: "Hi! I'm Leafy, I'll help you with your Ground Ops today",
+  },
+  {
+    sender: "assistant",
+    text: "Let's begin your Outbound operation's Checklist",
   },
   { sender: "user", text: "Hey, what’s this red light on my dashboard?" },
   { sender: "assistant", tool: "fetchDTCCodes" },

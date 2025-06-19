@@ -8,7 +8,6 @@ import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
 
 const ChatView = ({
-  setIsRecalculating,
   setCurrentView,
   simulationMode,
   selectedDevice,
@@ -26,7 +25,6 @@ const ChatView = ({
     typeMessageSimulate,
     startConversationSimulation,
   } = useChatSimulate({
-    setIsRecalculating,
     setCurrentView,
     setMessagesToShow,
     setIsTyping,
@@ -34,7 +32,6 @@ const ChatView = ({
   });
 
   const { handleLLMResponse, startRecording, stopRecording } = useChat({
-    setIsRecalculating,
     setCurrentView,
     setMessagesToShow,
     setIsTyping,
@@ -82,7 +79,6 @@ const ChatView = ({
 
   return (
     <div className={styles.chatViewContainer}>
-      {/* Scrollable chat messages */}
       <div className={styles.conversationContainer}>
         {messagesToShow.map((msg, index) => (
           <Message

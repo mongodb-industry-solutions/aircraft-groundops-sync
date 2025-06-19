@@ -18,7 +18,8 @@ const Login = ({ onUserSelected }) => {
     const users = Object.entries(USER_MAP).map(([id, details]) => ({
         id,
         name: details.UserName,
-        role: details.Role
+        role: details.Role,
+        employee: details.EmployeeNumber,
     }));
 
     const handleUserSelect = (user) => {

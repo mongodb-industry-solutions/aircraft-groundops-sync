@@ -3,7 +3,6 @@ import { useChatSession } from "@/context/ChatSessionContext";
 import { dtcCodesDictionary } from "@/lib/const";
 
 const useChat = ({
-  setIsRecalculating,
   setCurrentView,
   setMessagesToShow,
   setIsTyping,
@@ -116,9 +115,7 @@ const useChat = ({
     return new Promise((resolve) => {
       switch (functionCall.name) {
         case "recalculateRoute":
-          setIsRecalculating(true);
           setTimeout(() => {
-            setIsRecalculating(false);
 
             let response = { success: true };
             replyToFunctionCall(functionCall.name, response);

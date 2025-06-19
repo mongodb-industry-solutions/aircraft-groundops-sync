@@ -14,7 +14,6 @@ const InfotainmentScreen = ({
   const [time, setTime] = useState("--:--");
   const [currentView, setCurrentView] = useState("navigation");
   const [currentTime, setCurrentTime] = useState(0);
-  const [isRecalculating, setIsRecalculating] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
 
   useEffect(() => {
@@ -55,7 +54,6 @@ const InfotainmentScreen = ({
         {currentView === "chat" && (
           <>
             <ChatView
-              setIsRecalculating={setIsRecalculating}
               setCurrentView={setCurrentView}
               simulationMode={simulationMode}
               selectedDevice={selectedDevice}

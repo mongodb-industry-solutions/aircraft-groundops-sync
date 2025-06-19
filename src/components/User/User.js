@@ -25,6 +25,7 @@ const User = ({ user = null, isSelectedUser = false, setLocalSelectedUser = null
             />
             <H3 className={styles.userName}>{user.name}</H3>
             <Body className={styles.userRole}>{user.role}</Body>
+            <Body className={styles.userRole}> Employee ID: {user.employee}</Body>
         </Card>
     );
 };

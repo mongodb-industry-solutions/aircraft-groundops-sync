@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+/context/stepByStep.txt
+/stepByStep.txt
 
 # debug
 npm-debug.log*

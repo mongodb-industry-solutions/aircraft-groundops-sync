@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 
 const useChatSimulate = ({
-  setIsRecalculating,
   setCurrentView,
   setMessagesToShow,
   setIsTyping,
@@ -54,9 +53,7 @@ const useChatSimulate = ({
       return new Promise((resolve) => {
         switch (toolName) {
           case "recalculateRoute":
-            setIsRecalculating(true);
             setTimeout(() => {
-              setIsRecalculating(false);
               resolve();
             }, 2000);
             break;
@@ -71,7 +68,7 @@ const useChatSimulate = ({
         }
       });
     },
-    [setIsRecalculating, setCurrentView]
+    [setCurrentView]
   );
 
   const handleNextMessageSimulate = useCallback(async () => {
