@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 import { useState } from "react";
 import { H1 } from "@leafygreen-ui/typography";
 import ChatView from "@/components/chatView/ChatView";
-import InfoWizard from "@/components/infoWizard/InfoWizard";
+import InfoWizard from "@/components/InfoWizard/InfoWizard";
 import LogConsole from "@/components/logConsole/LogConsole";
 import { TALK_TRACK } from "@/lib/const";
 import '../fonts.css'

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./NavigationBar.module.css";
-import InfoWizard from "../InfoWizard/InfoWizard";
+import InfoWizard from "@/components/InfoWizard/InfoWizard";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import stylesInfoWizard from "@/components/InfoWizard/infoWizard.module.css";
 
 
 const NavigationBar = () => {
@@ -18,8 +19,8 @@ const NavigationBar = () => {
         <Link href="/">
           <Image
             src="/logo/gops_logo.png"
-            width={200}
-            height={35}
+            width={140}
+            height={32}
             priority
             alt="GroundOps Logo"
           />
