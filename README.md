@@ -29,6 +29,9 @@ To configure the environment for this demo, you need to set up the following var
 ```dotenv
 MONGODB_URI="<your-mongodb-connection-string>"
 DATABASE_NAME="car_assistant_demo"
+DATAWORKZ_API_KEY="your_api_key"
+DATAWORKZ_SYSTEM_ID="your_system_id"
+DATAWORKZ_LLM_PROVIDER_ID="your_llm_provider_id"
 GCP_PROJECT_ID="<your-gcp-project-id>"
 GCP_LOCATION="us-central1"
 VERTEXAI_COMPLETIONS_MODEL="gemini-2.0-flash-001"
