@@ -6,7 +6,6 @@ import styles from "./NavigationBar.module.css";
 import InfoWizard from "@/components/InfoWizard/InfoWizard";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import stylesInfoWizard from "@/components/InfoWizard/infoWizard.module.css";
 
 
 const NavigationBar = () => {
@@ -114,12 +113,12 @@ const NavigationBar = () => {
                 heading: "Data Flow",
                 body: "",
               },
-              {
-                image: {
-                  src: "./demoOverview.png",
-                  alt: "Architecture",
-                },
-              },
+              // {
+              //   image: {
+              //     src: "./demoOverview.png",
+              //     alt: "Architecture",
+              //   },
+              // },
             ],
           },
           {
