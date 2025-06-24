@@ -19,6 +19,7 @@ const ChatView = ({
   const [isRecording, setIsRecording] = useState(false);
   const [writerMode, setWriterMode] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
+  const [isLoadingDataworkz, setIsLoadingDataworkz] = useState(false);
 
   const {
     handleNextMessageSimulate,
@@ -54,20 +55,52 @@ const ChatView = ({
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesToShow, suggestedAnswer]);
 
-  const submitMessage = (text) => {
+  // Enhanced submitMessage to support Dataworkz
+  const submitMessage = async (text) => {
     setMessagesToShow((prev) => {
       const lastMessage = prev[prev.length - 1];
-
-      // If the last message is from the user and is empty, overwrite it
       if (lastMessage?.sender === "user" && lastMessage?.text.trim() === "") {
         return [...prev.slice(0, -1), { sender: "user", text }];
       }
-
-      // Otherwise, add a new message
       return [...prev, { sender: "user", text }];
     });
 
-    handleLLMResponse(text);
+    // Send all messages to Dataworkz API (remove /dataworkz prefix logic)
+    setIsTyping(true);
+    setIsLoadingDataworkz(true);
+    try {
+      const res = await fetch("/api/dataworkz/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionText: text }),
+      });
+
+      let answer = "No answer found.";
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        answer = errorData.error
+          ? `Error: ${errorData.error}${errorData.details ? ` (${errorData.details})` : ""}`
+          : "Unknown error occurred.";
+      } else {
+        const data = await res.json();
+        if (data.error) {
+          answer = `Error: ${data.error}${data.details ? ` (${data.details})` : ""}`;
+        } else {
+          answer = data.answer || data.result || data.response || "No answer found.";
+        }
+      }
+      setMessagesToShow((prev) => [
+        ...prev,
+        { sender: "assistant", text: answer, source: "dataworkz" },
+      ]);
+    } catch (e) {
+      setMessagesToShow((prev) => [
+        ...prev,
+        { sender: "assistant", text: "Network or server error. Please try again.", source: "dataworkz" },
+      ]);
+    }
+    setIsTyping(false);
+    setIsLoadingDataworkz(false);
   };
 
   // Stop recording automatically after the LLM response is sent
@@ -100,7 +133,7 @@ const ChatView = ({
           isRecording={isRecording}
           startRecording={startRecording}
           stopRecording={stopRecording}
-          isTyping={isTyping}
+          isTyping={isTyping || isLoadingDataworkz}
           submitMessage={submitMessage}
         />
       ) : (
