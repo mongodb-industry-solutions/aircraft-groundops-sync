@@ -21,6 +21,7 @@ Before running the demo, ensure you have the following:
 - A **MongoDB Atlas Cluster**
 - **Node.js 20** or higher
 - A **GCP account** with access to Vertex AI APIs
+- A Dataworkz account and RAG Application
 
 ## Environment Variables
 
@@ -28,7 +29,7 @@ To configure the environment for this demo, you need to set up the following var
 
 ```dotenv
 MONGODB_URI="<your-mongodb-connection-string>"
-DATABASE_NAME="car_assistant_demo"
+DATABASE_NAME="ground_ops_demo"
 DATAWORKZ_API_KEY="your_api_key"
 DATAWORKZ_SYSTEM_ID="your_system_id"
 DATAWORKZ_LLM_PROVIDER_ID="your_llm_provider_id"

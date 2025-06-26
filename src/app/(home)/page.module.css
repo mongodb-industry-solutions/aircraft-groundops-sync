@@ -11,6 +11,30 @@
 
 .header {
   text-align: center;
+  position: relative;
+  width: 100%;
+}
+
+.headerControls {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.backButton {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.backButton:hover {
+  background-color: #e0e0e0;
 }
 
 .openAssistantButton {

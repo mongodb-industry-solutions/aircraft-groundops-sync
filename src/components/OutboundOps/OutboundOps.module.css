@@ -1,0 +1,189 @@
+.modalCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.centerText {
+    text-align: center;
+}
+
+.weightNormal {
+    font-weight: normal;
+}
+
+.operationsContainer {
+    display: grid;
+    column-gap: 20px;
+    row-gap: 20px;
+    justify-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
+    justify-content: space-evenly;
+    margin: 30px 0px 20px 0px;
+    max-width: 100%;
+}
+
+.operationCard {
+    width: 100%;
+    min-width: 280px;
+    max-width: 320px;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 16px;
+    background: #fff;
+    margin: 0 2px;
+    box-sizing: border-box;
+    border: 1.5px solid #e0e0e0;
+    transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.operationCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.operationSelected {
+    border: 2px solid #13aa52 !important;
+    box-shadow: 0 0 0 3px #13aa5233, 0 4px 16px rgba(0,0,0,0.12) !important;
+    transform: translateY(-2px);
+}
+
+.cursorPointer {
+    cursor: pointer;
+}
+
+.operationIcon {
+    margin-bottom: 16px;
+    color: #13aa52;
+}
+
+.operationTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 8px;
+    text-align: center;
+    letter-spacing: 0.01em;
+}
+
+.operationDescription {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.operationSteps {
+    font-size: 12px;
+    color: #13aa52;
+    font-weight: 500;
+    background: #13aa5208;
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-top: auto;
+}
+
+.descriptionModal {
+    font-size: 14px;
+    display: center;
+    text-align: center;
+}
+
+.modalMainContent {
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 24px;
+    justify-content: center;
+}
+
+.proceedContainer {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0 20px 0;
+}
+
+.proceedButton {
+    background: #13aa52;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.proceedButton:hover:not(:disabled) {
+    background: #0f8a42;
+    transform: translateY(-1px);
+}
+
+.proceedButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.disabledButton {
+    background: #ccc !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+
+.parentContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+}
+
+.customModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 32, 34, 0.65);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.customModalBox {
+    width: 60%;
+    max-width: 1200px;
+    height: 85%;
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 50px 0 10px 0;
+    overflow: auto;
+}
+
+@media (max-width: 768px) {
+    .customModalBox {
+        width: 98vw;
+        height: 98vh;
+        border-radius: 0;
+    }
+    
+    .operationsContainer {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin: 20px 0;
+    }
+    
+    .operationCard {
+        min-width: 250px;
+    }
+}

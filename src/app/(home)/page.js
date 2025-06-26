@@ -6,6 +6,7 @@ import { H1 } from "@leafygreen-ui/typography";
 import ChatView from "@/components/chatView/ChatView";
 import InfoWizard from "@/components/InfoWizard/InfoWizard";
 import LogConsole from "@/components/logConsole/LogConsole";
+import OutboundOps from "@/components/OutboundOps/OutboundOps";
 import { TALK_TRACK } from "@/lib/const";
 import '../fonts.css'
 import dynamic from "next/dynamic";
@@ -14,6 +15,8 @@ const Login = dynamic(() => import('@/components/Login/Login'), { ssr: false });
 
 export default function Home() {
   const [userSelected, setUserSelected] = useState(false);
+  const [operationSelected, setOperationSelected] = useState(false);
+  const [selectedOperation, setSelectedOperation] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [simulationMode, setSimulationMode] = useState(false);
   const [openHelpModal, setOpenHelpModal] = useState(false);
@@ -25,13 +28,33 @@ export default function Home() {
     setUserSelected(true);
   };
 
+  const handleOperationSelected = (operation) => {
+    setSelectedOperation(operation);
+    setOperationSelected(true);
+  };
+
   return (
     <>
       {!userSelected && <Login onUserSelected={handleUserSelected} />}
-      {userSelected && (
+      {userSelected && !operationSelected && (
+        <OutboundOps onOperationSelected={handleOperationSelected} />
+      )}
+      {userSelected && operationSelected && (
         <div className={styles.page} style={{ color: "black" }}>
           <div className={styles.header}>
-            <H1>Aircraft Ground Operations</H1>
+            <div className={styles.headerControls}>
+              <button
+                onClick={() => {
+                  setOperationSelected(false);
+                  setSelectedOperation(null);
+                  setShowChatView(false);
+                }}
+                className={styles.backButton}
+              >
+                ← Change Operation
+              </button>
+            </div>
+            <H1>Aircraft Ground Operations - {selectedOperation?.title}</H1>
           </div>
           <InfoWizard
             open={openHelpModal}
@@ -47,7 +70,7 @@ export default function Home() {
                 onClick={() => setShowChatView(true)}
                 className={styles.assistantButton}
               >
-                Open Assistant
+                Open Assistant for {selectedOperation?.title}
               </button>
             </div>
           ) : (
@@ -60,6 +83,7 @@ export default function Home() {
               }}
               simulationMode={simulationMode}
               selectedDevice={selectedDevice}
+              selectedOperation={selectedOperation}
             />
           )}
 

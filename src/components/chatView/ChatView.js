@@ -74,7 +74,9 @@ const ChatView = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionText: text }),
       });
+      console.log(res.json()
 
+      )
       let answer = "No answer found.";
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
