@@ -50,12 +50,11 @@ const ChatView = ({
     }
   }, [simulationMode, startConversationSimulation, typeMessageSimulate]);
 
-  // Scroll to the bottom when messages update
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesToShow, suggestedAnswer]);
 
-  // Enhanced submitMessage to support Dataworkz
+  // submitMessage to Dataworkz
   const submitMessage = async (text) => {
     setMessagesToShow((prev) => {
       const lastMessage = prev[prev.length - 1];
@@ -65,7 +64,7 @@ const ChatView = ({
       return [...prev, { sender: "user", text }];
     });
 
-    // Send all messages to Dataworkz API (remove /dataworkz prefix logic)
+    // Send all messages to Dataworkz API
     setIsTyping(true);
     setIsLoadingDataworkz(true);
     try {
@@ -105,7 +104,7 @@ const ChatView = ({
     setIsLoadingDataworkz(false);
   };
 
-  // Stop recording automatically after the LLM response is sent
+  // Stop after LLM response sent
   useEffect(() => {
     if (!simulationMode && !isTyping && !isRecording && !writerMode) {
       startRecording();

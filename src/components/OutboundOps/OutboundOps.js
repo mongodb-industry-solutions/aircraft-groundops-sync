@@ -74,7 +74,7 @@ const OutboundOps = ({ onOperationSelected }) => {
                                 tabIndex={0}
                             >
                                 <div className={styles.operationIcon}>
-                                    <Icon glyph={operation.icon} size="large" />
+                                    <Icon glyph={operation.icon} size="x-large" />
                                 </div>
                                 <h3 className={styles.operationTitle}>{operation.title}</h3>
                                 <p className={styles.operationDescription}>{operation.description}</p>
