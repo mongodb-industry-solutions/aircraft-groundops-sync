@@ -57,15 +57,16 @@
 }
 
 .operationIcon {
-    margin-bottom: 16px;
+    margin-bottom: 5px;
+    margin-top: 5px;
     color: #13aa52;
 }
 
 .operationTitle {
     font-size: 20px;
     font-weight: 600;
-    color: #222;
-    margin-bottom: 8px;
+    color: #001E2B;
+    margin-bottom: 10px;
     text-align: center;
     letter-spacing: 0.01em;
 }

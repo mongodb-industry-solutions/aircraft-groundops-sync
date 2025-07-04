@@ -26,12 +26,6 @@ const NavigationBar = () => {
         </Link>
       </div>
       <div className={styles.linkContainer}>
-        <Link
-          href="/"
-          className={`${styles.link} ${pathname === "/" ? styles.active : ""}`}
-        >
-          Outbound Operation
-        </Link>
       </div>
 
       <InfoWizard

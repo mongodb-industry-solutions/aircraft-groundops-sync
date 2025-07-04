@@ -7,7 +7,7 @@ import ChatView from "@/components/chatView/ChatView";
 import InfoWizard from "@/components/InfoWizard/InfoWizard";
 import LogConsole from "@/components/logConsole/LogConsole";
 import OutboundOps from "@/components/OutboundOps/OutboundOps";
-import { TALK_TRACK } from "@/lib/const";
+import Checklist from "@/components/Checklist/checklist";
 import '../fonts.css'
 import dynamic from "next/dynamic";
 
@@ -23,6 +23,7 @@ export default function Home() {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [currentView, setCurrentView] = useState("navigation");
   const [showChatView, setShowChatView] = useState(false);
+  const [showChecklist, setShowChecklist] = useState(false);
 
   const handleUserSelected = () => {
     setUserSelected(true);
@@ -48,6 +49,7 @@ export default function Home() {
                   setOperationSelected(false);
                   setSelectedOperation(null);
                   setShowChatView(false);
+                  setShowChecklist(false);
                 }}
                 className={styles.backButton}
               >
@@ -61,10 +63,9 @@ export default function Home() {
             setOpen={setOpenHelpModal}
             tooltipText="Tell me more!"
             iconGlyph="Wizard"
-            sections={TALK_TRACK}
           />
 
-          {!showChatView ? (
+          {!showChatView && !showChecklist ? (
             <div className={styles.openAssistantButton}>
               <button
                 onClick={() => setShowChatView(true)}
@@ -72,7 +73,18 @@ export default function Home() {
               >
                 Open Assistant for {selectedOperation?.title}
               </button>
+              <button
+                onClick={() => setShowChecklist(true)}
+                className={styles.checklistButton}
+              >
+                View Checklist for {selectedOperation?.title}
+              </button>
             </div>
+          ) : showChecklist ? (
+            <Checklist 
+              selectedOperation={selectedOperation}
+              onBack={() => setShowChecklist(false)}
+            />
           ) : (
             <ChatView
               setCurrentView={(view) => {

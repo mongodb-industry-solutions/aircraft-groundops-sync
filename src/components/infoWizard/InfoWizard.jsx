@@ -60,10 +60,11 @@ const InfoWizard = ({
 
   return (
     <>
-      {/* Bigger button for navbars */}
-      <Button onClick={() => setOpen((prev) => !prev)} leftGlyph={<Icon glyph={iconGlyph} />}>
-        Tell me more!
-      </Button>
+      <div className={styles.infoWizardButton}>
+        <Button onClick={() => setOpen((prev) => !prev)} leftGlyph={<Icon glyph={iconGlyph} />}>
+          Tell me more!
+        </Button>
+      </div>
 
       <CustomModal open={open} setOpen={setOpen} className={styles.modal}>
         <div className={styles.modalContent}>

@@ -70,7 +70,6 @@
     }
   }
 
-/* Custom Modal Styles */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -118,4 +117,8 @@
 .modalCloseButton:hover {
   background-color: #f0f0f0;
   color: #333;
+}
+
+.infoWizardButton {
+  margin-right: 3%;
 }

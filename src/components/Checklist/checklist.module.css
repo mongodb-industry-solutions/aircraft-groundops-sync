@@ -1,0 +1,435 @@
+.checklistPage {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  background: #ffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.headerLeft {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.headerCenter {
+  flex: 2;
+  text-align: center;
+}
+
+.headerRight {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pageTitle {
+  margin-bottom: 10px;
+  color: #001E2B;
+}
+
+.progressInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressBar {
+  width: 300px;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ED64 0%, #00A36C 100%);
+  transition: width 0.3s ease;
+}
+
+.completionBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0f8f0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid #00ED64;
+}
+
+.mainContent {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+}
+
+.checklistSection {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.assistantSection {
+  flex: 1;
+  min-width: 400px;
+}
+
+.priorCard {
+  margin-bottom: 20px;
+}
+
+.priorHeader {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.priorContent {
+  padding: 0;
+}
+
+.priorHeaderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  position: relative;
+}
+
+.dropdownIcon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-top: 5px;
+}
+
+.priorDescription {
+  color: #666;
+  font-style: italic;
+}
+
+.mainChecklistCard {
+  flex: 1;
+}
+
+.tableSection {
+  padding: 20px;
+}
+
+.sectionTitle {
+  margin-bottom: 20px;
+  color: #001E2B;
+  border-bottom: 2px solid #00684A;
+  padding-bottom: 10px;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.checklistTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffff;
+}
+
+.checklistTable th {
+  background: #f8f9fa;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #001E2B;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.orderHeader {
+  width: 80px;
+  text-align: center;
+}
+
+.stepHeader {
+  width: auto;
+  min-width: 300px;
+}
+
+.statusHeader {
+  width: 120px;
+  text-align: center;
+}
+
+.tableRow {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s ease;
+}
+
+.tableRow:hover {
+  background-color: #f8f9fa;
+}
+
+.completedRow {
+  background-color: #e8f5e8;
+}
+
+.completedRow:hover {
+  background-color: #d4f0d4;
+}
+
+.inProgressRow {
+  background-color: #fff8e1;
+}
+
+.inProgressRow:hover {
+  background-color: #FFEC9E;
+}
+
+.pendingRow {
+  background-color: #F9FBFA;
+}
+
+.pendingRow:hover {
+  background-color: #C1C7C6;
+}
+
+.orderCell,
+.stepCell,
+.statusCell {
+  padding: 15px;
+  vertical-align: middle;
+}
+
+.orderCell {
+  text-align: center;
+}
+
+.orderBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  background: #666;
+  color: #ffff;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.pendingBadge {
+  background: #666;
+}
+
+.inProgressBadge {
+  background: #FFB000;
+}
+
+.completedBadge {
+  background: #4CAF50;
+}
+
+.stepCell {
+  width: 100%;
+}
+
+.stepText {
+  line-height: 1.5;
+  color: #333;
+}
+
+.statusCell {
+  text-align: center;
+}
+
+.statusIndicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.statusText {
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.completionCard {
+  padding: 30px;
+  text-align: center;
+  background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 100%);
+  border: 2px solid #00ED64;
+}
+
+.completionContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.assistantCard {
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.assistantHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.assistantContent {
+  height: 600px;
+  overflow: hidden;
+}
+
+.loadingContainer,
+.errorContainer,
+.noDataContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: 20px;
+  background: #ffff;
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.errorContainer {
+  color: #d32f2f;
+}
+
+.loadingContainer {
+  color: #666;
+}
+
+@media (max-width: 1200px) {
+  .mainContent {
+    flex-direction: column;
+  }
+  
+  .assistantSection {
+    min-width: auto;
+  }
+  
+  .assistantCard {
+    position: static;
+  }
+  
+  .assistantContent {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .checklistPage {
+    padding: 10px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .headerLeft,
+  .headerRight {
+    flex: none;
+  }
+  
+  .headerCenter {
+    flex: none;
+  }
+  
+  .progressBar {
+    width: 250px;
+  }
+  
+  .mainContent {
+    gap: 15px;
+  }
+  
+  .tableSection {
+    padding: 15px;
+  }
+  
+  .checklistTable {
+    font-size: 14px;
+  }
+  
+  .orderHeader,
+  .statusHeader {
+    width: auto;
+  }
+  
+  .stepHeader {
+    min-width: 200px;
+  }
+  
+  .orderCell,
+  .stepCell,
+  .statusCell {
+    padding: 10px;
+  }
+  
+  .orderBadge {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+  
+  .assistantContent {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+  
+  .progressBar {
+    width: 200px;
+  }
+  
+  .tableContainer {
+    font-size: 12px;
+  }
+  
+  .stepHeader {
+    min-width: 150px;
+  }
+  
+  .assistantHeader {
+    gap: 8px;
+  }
+}
