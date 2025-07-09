@@ -74,7 +74,11 @@ const Checklist = ({ selectedOperation, onBack }) => {
   const renderChecklistTable = (items, title, tableId) => {
     if (!items || items.length === 0) return null;
 
-    const sortedItems = [...items].sort((a, b) => a.order - b.order);
+    const sortedItems = [...items].sort((a, b) => {
+      const orderA = a.order !== undefined ? a.order : 999999;
+      const orderB = b.order !== undefined ? b.order : 999999;
+      return orderA - orderB;
+    });
     const isPriorChecklist = tableId === 'prior';
 
     return (
@@ -91,14 +95,17 @@ const Checklist = ({ selectedOperation, onBack }) => {
             </thead>
             <tbody>
               {sortedItems.map((item, index) => {
-                const itemId = `${tableId}_${item.order}`;
+                // Ensure unique key by using index as fallback if order is undefined
+                const orderKey = item.order !== undefined ? item.order : index;
+                const itemId = `${tableId}_${orderKey}`;
                 const isCompleted = completedItems[itemId];
                     let isInProgress = false;
                     let isClickable = false;
                 if (isPriorChecklist) {
                   isClickable = true;
                 } else {
-                  const isPrevCompleted = index === 0 || completedItems[`${tableId}_${sortedItems[index - 1].order}`];
+                  const prevOrderKey = sortedItems[index - 1]?.order !== undefined ? sortedItems[index - 1]?.order : index - 1;
+                  const isPrevCompleted = index === 0 || completedItems[`${tableId}_${prevOrderKey}`];
                   isInProgress = !isCompleted && isPrevCompleted;
                   isClickable = isCompleted || isInProgress;
                 }
@@ -120,7 +127,7 @@ const Checklist = ({ selectedOperation, onBack }) => {
                         isInProgress ? styles.inProgressBadge : 
                         styles.pendingBadge
                       }`}>
-                        {item.order}
+                        {item.order !== undefined ? item.order : index + 1}
                       </div>
                     </td>
                     <td className={styles.stepCell}>

@@ -30,6 +30,10 @@ const useChat = ({
       return updatedMessages;
     });
 
+    // const response = await fetch("/api/gcp/test");
+    // const data = await response.json();
+    // console.log(data);
+
     const response = await fetch("/api/gcp/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { startChatSession, createEmbedding } from "@/lib/vertexai";
-import { vectorSearch, clientPromise } from "@/lib/mongodb";
+import { startChatSession } from "@/lib/vertexai";
+import { clientPromise } from "@/lib/mongodb";
 
 export async function POST(req) {
   try {
@@ -32,39 +32,8 @@ export async function POST(req) {
             await result.response;
             const { name, args } = functionCall;
 
-            if (name === "consultManual") {
-              const queryEmbedding = await createEmbedding(args.query);
-              const relevantChunks = await vectorSearch(queryEmbedding);
-
-              const functionResponseParts = [
-                {
-                  functionResponse: {
-                    name,
-                    response: {
-                      name,
-                      content: {
-                        chunks: relevantChunks,
-                      },
-                    },
-                  },
-                },
-              ];
-
-              addLog(sessionId, name, "response", functionResponseParts);
-
-              const followUpResult = await chat.sendMessageStream(
-                functionResponseParts
-              );
-
-              for await (const item of followUpResult.stream) {
-                const token =
-                  item.candidates[0]?.content?.parts?.[0]?.text || "";
-                controller.enqueue(token);
-              }
-            } else {
-              // Client-side function calls (handled in frontend)
-              controller.enqueue(JSON.stringify({ functionCall }));
-            }
+            // Client-side function calls (handled in frontend)
+            controller.enqueue(JSON.stringify({ functionCall }));
           }
 
           controller.close(); // Close stream when done
@@ -83,6 +52,7 @@ export async function POST(req) {
       },
     });
   } catch (error) {
+    console.log("API error:", error);
     console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

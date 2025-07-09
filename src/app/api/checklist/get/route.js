@@ -16,7 +16,6 @@ export async function POST(request) {
     const db = client.db(process.env.DATABASE_NAME);
     const checklistCollection = db.collection('checklist');
 
-    // Query the checklist collection based on the operation ID
     const checklistData = await checklistCollection.findOne({
       "aircraft_ground_ops.outbound_operations": {
         $exists: true
@@ -30,7 +29,6 @@ export async function POST(request) {
       );
     }
 
-    // Navigate to the specific operation data
     const operationData = checklistData.aircraft_ground_ops?.outbound_operations?.[operationId];
 
     if (!operationData) {
@@ -40,7 +38,6 @@ export async function POST(request) {
       );
     }
 
-    // Return the operation-specific checklist data
     return NextResponse.json({
       operationId,
       operationTitle: operationId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),

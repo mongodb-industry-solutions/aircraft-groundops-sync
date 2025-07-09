@@ -36,7 +36,7 @@
 
 .pageTitle {
   margin-bottom: 10px;
-  color: #001E2B;
+  color: #001e2b;
 }
 
 .progressInfo {
@@ -56,7 +56,7 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #00ED64 0%, #00A36C 100%);
+  background: linear-gradient(90deg, #00ed64 0%, #00a36c 100%);
   transition: width 0.3s ease;
 }
 
@@ -67,7 +67,7 @@
   background: #f0f8f0;
   padding: 8px 16px;
   border-radius: 20px;
-  border: 2px solid #00ED64;
+  border: 2px solid #00ed64;
 }
 
 .mainContent {
@@ -86,19 +86,24 @@
 .assistantSection {
   flex: 1;
   min-width: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
 .priorCard {
   margin-bottom: 20px;
+  max-height: 300px; /* Limit the height of the prior card */
 }
 
 .priorHeader {
-  padding: 20px;
+  padding: 15px; /* Reduced padding */
   border-bottom: 1px solid #e0e0e0;
 }
 
 .priorContent {
   padding: 0;
+  max-height: 200px; /* Limit content height */
+  overflow-y: auto; /* Add scroll if needed */
 }
 
 .priorHeaderContent {
@@ -106,7 +111,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
+  gap: 6px; /* Reduced gap */
   position: relative;
 }
 
@@ -132,8 +137,8 @@
 
 .sectionTitle {
   margin-bottom: 20px;
-  color: #001E2B;
-  border-bottom: 2px solid #00684A;
+  color: #001e2b;
+  border-bottom: 2px solid #00684a;
   padding-bottom: 10px;
 }
 
@@ -154,7 +159,7 @@
   padding: 15px;
   text-align: left;
   font-weight: 600;
-  color: #001E2B;
+  color: #001e2b;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -195,15 +200,15 @@
 }
 
 .inProgressRow:hover {
-  background-color: #FFEC9E;
+  background-color: #ffec9e;
 }
 
 .pendingRow {
-  background-color: #F9FBFA;
+  background-color: #f9fbfa;
 }
 
 .pendingRow:hover {
-  background-color: #C1C7C6;
+  background-color: #c1c7c6;
 }
 
 .orderCell,
@@ -236,11 +241,11 @@
 }
 
 .inProgressBadge {
-  background: #FFB000;
+  background: #ffb000;
 }
 
 .completedBadge {
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 .stepCell {
@@ -275,7 +280,7 @@
   padding: 30px;
   text-align: center;
   background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 100%);
-  border: 2px solid #00ED64;
+  border: 2px solid #00ed64;
 }
 
 .completionContent {
@@ -286,10 +291,13 @@
 }
 
 .assistantCard {
-  padding: 20px;
-  height: fit-content;
+  padding: 15px; /* Reduced padding */
+  height: calc(100vh - 300px); /* Leave space for log console button */
   position: sticky;
   top: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .assistantHeader {
@@ -297,15 +305,17 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
+  gap: 8px; /* Reduced gap */
+  margin-bottom: 15px; /* Reduced margin */
+  padding-bottom: 10px; /* Reduced padding */
   border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0; /* Don't shrink the header */
 }
 
 .assistantContent {
-  height: 600px;
+  flex: 1; /* Take remaining space */
   overflow: hidden;
+  min-height: 0; /* Allow flex child to shrink */
 }
 
 .loadingContainer,
@@ -330,6 +340,21 @@
 
 .loadingContainer {
   color: #666;
+}
+
+/* Log Console Icon */
+.logConsoleIcon {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.logConsoleIcon:hover {
+  color: #00684a;
 }
 
 @media (max-width: 1200px) {

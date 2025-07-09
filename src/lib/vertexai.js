@@ -10,8 +10,6 @@ import { SAMPLE_CONVERSATION } from "./const";
 const project = process.env.GCP_PROJECT_ID;
 const location = process.env.GCP_LOCATION;
 const completionsModel = process.env.VERTEXAI_COMPLETIONS_MODEL;
-const embeddingsModel = process.env.VERTEXAI_EMBEDDINGS_MODEL;
-const apiEndpoint = process.env.VERTEXAI_API_ENDPOINT;
 
 const vertexAIClient = new VertexAI({ project, location });
 const predictionServiceClient = new PredictionServiceClient({
@@ -122,34 +120,3 @@ export const startChatSession = (sessionId) => {
   }
   return chatSessions[sessionId];
 };
-
-export async function createEmbedding(text) {
-  try {
-    const endpoint = `projects/${project}/locations/${location}/publishers/google/models/${embeddingsModel}`;
-
-    const instances = text
-      .split(";")
-      .map((e) =>
-        helpers.toValue({ content: e, task_type: "QUESTION_ANSWERING" })
-      );
-
-    const request = {
-      endpoint,
-      instances,
-      parameters: helpers.toValue({ outputDimensionality: 768 }),
-    };
-
-    const [response] = await predictionServiceClient.predict(request);
-    const predictions = response.predictions;
-    const embeddings = predictions.map((p) => {
-      const embeddingsProto = p.structValue.fields.embeddings;
-      const valuesProto = embeddingsProto.structValue.fields.values;
-      return valuesProto.listValue.values.map((v) => v.numberValue);
-    });
-
-    return embeddings[0];
-  } catch (error) {
-    console.error("Error generating embedding:", error);
-    throw new Error("Embedding generation failed");
-  }
-}
