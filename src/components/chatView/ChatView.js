@@ -7,6 +7,33 @@ import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
 
+
+const handleTextToSpeech = async (text) => {
+  try {
+    const audioResponse = await fetch("/api/gcp/textToSpeech", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+
+    const { audioContent } = await audioResponse.json();
+
+    if (audioContent) {
+      const audio = new Audio(`data:audio/wav;base64,${audioContent}`);
+      const playPromise = audio.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log("Audio playback required user interaction first:", error);
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error in text-to-speech:", error);
+  }
+};
+
+
 const ChatView = ({
   setCurrentView,
   simulationMode,
@@ -92,6 +119,12 @@ const ChatView = ({
         ...prev,
         { sender: "assistant", text: answer, source: "dataworkz" },
       ]);
+
+      // 🔊 Play the assistant response
+      if (!isSpeakerMuted) {
+        await handleTextToSpeech(answer);
+      }
+
     } catch (e) {
       setMessagesToShow((prev) => [
         ...prev,

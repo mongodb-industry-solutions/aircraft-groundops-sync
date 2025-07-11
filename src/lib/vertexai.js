@@ -11,6 +11,8 @@ const project = process.env.GCP_PROJECT_ID;
 const location = process.env.GCP_LOCATION;
 const completionsModel = process.env.VERTEXAI_COMPLETIONS_MODEL;
 
+const apiEndpoint = process.env.VERTEXAI_API_ENDPOINT;
+
 const vertexAIClient = new VertexAI({ project, location });
 const predictionServiceClient = new PredictionServiceClient({
   apiEndpoint,

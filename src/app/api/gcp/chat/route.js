@@ -5,9 +5,18 @@ import { clientPromise } from "@/lib/mongodb";
 export async function POST(req) {
   try {
     const { sessionId, message } = await req.json();
+    // Added by gio to ensure sessionId is provided
+    console.log("Received sessionId:", sessionId);
+    console.log("Received message:", message);
+
     const chat = startChatSession(sessionId);
+    console.log("chat session started:", chat);
 
     const result = await chat.sendMessageStream(message);
+    console.log("Received result from chat:", result);
+
+    // End block of code added by Gio
+    
     let functionCall = null;
     let assistantResponse = "";
 
