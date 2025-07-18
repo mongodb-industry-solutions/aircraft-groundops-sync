@@ -1,34 +1,58 @@
 export const DEFAULT_GREETINGS = {
   sender: "assistant",
-  text: "Hi! I'm Leafy, I'll help you with your Ground Ops today",
+  text: "Ready to start your checklist! Let me get the items for you.",
 };
 
 export const SAMPLE_CONVERSATION = [
   {
     sender: "assistant",
-    text: "Hi! I'm Leafy, I'll help you with your Ground Ops today",
+    text: "Ready to start your checklist! Let me get the items for you.",
+  },
+  { sender: "assistant", tool: "retrieveChecklist" },
+  {
+    sender: "assistant",
+    text: "Let's begin your Outbound Operation's checklist",
   },
   {
     sender: "assistant",
-    text: "Let's begin your Outbound operation's Checklist",
+    text: "The first step is: {Read the checklist in steps order}, please confirm completion"
   },
-  { sender: "user", text: "Hey, what’s this red light on my dashboard?" },
-  { sender: "assistant", tool: "fetchDTCCodes" },
+  { 
+    sender: "user", text: "Done" 
+  },
   {
     sender: "assistant",
-    text: "That’s the engine oil pressure warning. It means your oil level might be low. Want me to guide you on what to do?",
+    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
   },
-  { sender: "user", text: "Yes, please." },
-  { sender: "assistant", tool: "consultManual" },
+  { 
+    sender: "user", text: "Check" 
+  },
   {
     sender: "assistant",
-    text: "First, pull over safely and turn off the engine. Then, check the oil level and top it up if needed. If the light stays on, you should get the car checked. Want me to add the nearest service station to your route?",
+    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
   },
-  { sender: "user", text: "Yes, that’d be great!" },
-  { sender: "assistant", tool: "recalculateRoute" },
+  { 
+    sender: "user", text: "Completed" 
+  },
   {
     sender: "assistant",
-    text: "Done! I’ve set your route to the closest service station. Drive safely! Is there anything else I can assist you with today?",
+    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
+  },
+  { sender: "user", text: "Done" },
+  {
+    sender: "assistant",
+    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
+  },
+  { sender: "user", text: "Check" },
+  {
+    sender: "assistant",
+    text: "Done! You've completed your Outbound Operation's checklist. If you need further assistance, let me know!",
+  },
+  { sender: "user", text: "What does step 3 involve exactly?" },
+  { sender: "assistant", tool: "queryDataworkz" },
+    {
+    sender: "assistant",
+    text: "Do you need further assistance?"
   },
   {
     sender: "user",

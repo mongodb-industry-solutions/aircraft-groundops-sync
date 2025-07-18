@@ -38,6 +38,7 @@ const ChatView = ({
   setCurrentView,
   simulationMode,
   selectedDevice,
+  selectedOperation,
 }) => {
   const chatEndRef = useRef(null);
   const [messagesToShow, setMessagesToShow] = useState([]);
@@ -66,6 +67,7 @@ const ChatView = ({
     setIsRecording,
     selectedDevice,
     isSpeakerMuted,
+    selectedOperation,
   });
 
   useEffect(() => {
@@ -74,8 +76,15 @@ const ChatView = ({
     } else {
       setMessagesToShow([DEFAULT_GREETINGS]);
       typeMessageSimulate(DEFAULT_GREETINGS, 0);
+      
+      // If we have a selected operation, automatically trigger checklist retrieval
+      if (selectedOperation) {
+        setTimeout(() => {
+          handleLLMResponse("Start checklist");
+        }, 1000);
+      }
     }
-  }, [simulationMode, startConversationSimulation, typeMessageSimulate]);
+  }, [simulationMode, startConversationSimulation, typeMessageSimulate, selectedOperation]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,7 +129,6 @@ const ChatView = ({
         { sender: "assistant", text: answer, source: "dataworkz" },
       ]);
 
-      // 🔊 Play the assistant response
       if (!isSpeakerMuted) {
         await handleTextToSpeech(answer);
       }
@@ -135,7 +143,6 @@ const ChatView = ({
     setIsLoadingDataworkz(false);
   };
 
-  // Stop after LLM response sent
   useEffect(() => {
     if (!simulationMode && !isTyping && !isRecording && !writerMode) {
       startRecording();

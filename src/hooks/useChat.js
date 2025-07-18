@@ -9,6 +9,7 @@ const useChat = ({
   setIsRecording,
   selectedDevice,
   isSpeakerMuted,
+  selectedOperation,
 }) => {
   const socketRef = useRef(null);
   const processorRef = useRef(null);
@@ -16,6 +17,11 @@ const useChat = ({
   const audioInputRef = useRef(null);
 
   const sessionId = useChatSession();
+
+  // Debug logging
+  useEffect(() => {
+    console.log("useChat hook initialized with selectedOperation:", selectedOperation);
+  }, [selectedOperation]);
 
   // Web Socket Config
   const protocol = process.env.NEXT_PUBLIC_ENV === "local" ? "ws" : "wss";
@@ -72,7 +78,6 @@ const useChat = ({
           isFunctionCallActive = false;
         }
       } catch {
-        // Normal text response, continue displaying
         partialMessage += decodedChunk;
         setMessagesToShow((prevMessages) =>
           prevMessages.map((msg, index) =>
@@ -116,19 +121,93 @@ const useChat = ({
   };
 
   const handleFunctionCall = async (functionCall) => {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       switch (functionCall.name) {
-        case "recalculateRoute":
-          setTimeout(() => {
+        case "retrieveChecklist":
+          try {
+            // Use the selectedOperation passed from the component, or get from function args
+            const operationId = functionCall.args?.operationId || selectedOperation;
+            
+            console.log("retrieveChecklist called with:", {
+              functionCallArgs: functionCall.args,
+              selectedOperation,
+              finalOperationId: operationId
+            });
+            
+            if (!operationId) {
+              console.log("No operation ID available");
+              let errorResponse = { success: false, error: "No operation selected" };
+              replyToFunctionCall(functionCall.name, errorResponse);
+              addLog(sessionId, functionCall.name, "error", errorResponse);
+              resolve();
+              break;
+            }
 
-            let response = { success: true };
-            replyToFunctionCall(functionCall.name, response);
+            const response = await fetch("/api/checklist/get", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ operationId }),
+            });
 
-            addLog(sessionId, functionCall.name, "response", response);
+            const checklistData = await response.json();
+            
+            if (response.ok) {
+              let responseData = {
+                success: true,
+                checklist: checklistData.checklist,
+                operationTitle: checklistData.operationTitle,
+                prior: checklistData.prior,
+                operationId,
+              };
+              
+              replyToFunctionCall(functionCall.name, responseData);
+              addLog(sessionId, functionCall.name, "response", responseData);
+            } else {
+              let errorResponse = { success: false, error: checklistData.error };
+              replyToFunctionCall(functionCall.name, errorResponse);
+              addLog(sessionId, functionCall.name, "error", errorResponse);
+            }
+          } catch (error) {
+            console.error("Error retrieving checklist:", error);
+            let errorResponse = { success: false, error: error.message };
+            replyToFunctionCall(functionCall.name, errorResponse);
+            addLog(sessionId, functionCall.name, "error", errorResponse);
+          }
+          resolve();
+          break;
 
-            resolve();
-          }, 2000);
+        case "queryDataworkz":
+          try {
+            const { questionText } = functionCall.args;
+            const response = await fetch("/api/dataworkz/answer", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ questionText }),
+            });
 
+            const dataworkzResponse = await response.json();
+            
+            if (response.ok) {
+              let responseData = {
+                success: true,
+                answer: dataworkzResponse.answer || dataworkzResponse,
+                questionText,
+              };
+              
+              replyToFunctionCall(functionCall.name, responseData);
+              addLog(sessionId, functionCall.name, "response", responseData);
+            } else {
+              let errorResponse = { success: false, error: dataworkzResponse.error };
+              replyToFunctionCall(functionCall.name, errorResponse);
+              addLog(sessionId, functionCall.name, "error", errorResponse);
+            }
+          } catch (error) {
+            console.error("Error querying Dataworkz:", error);
+            let errorResponse = { success: false, error: error.message };
+            replyToFunctionCall(functionCall.name, errorResponse);
+            addLog(sessionId, functionCall.name, "error", errorResponse);
+          }
+          resolve();
           break;
 
         case "closeChat":
@@ -204,7 +283,7 @@ const useChat = ({
       // Check if the last message is from the user and is empty
       const lastMessage = prev[prev.length - 1];
       if (lastMessage?.sender === "user" && lastMessage?.text?.trim() === "") {
-        return prev; // Do nothing if the last message is empty
+        return prev; 
       }
       return [...prev, { sender: "user", text: "" }];
     });
@@ -292,7 +371,6 @@ const useChat = ({
 
   const handleTextToSpeech = async (text) => {
     try {
-      // Make a request to our text-to-speech API to get the audio content
       const audioResponse = await fetch("/api/gcp/textToSpeech", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -304,18 +382,11 @@ const useChat = ({
       if (audioContent) {
         const audio = new Audio(`data:audio/wav;base64,${audioContent}`);
 
-        // Check if the context is already allowed to play audio
         const playPromise = audio.play();
 
-        // Handle potential play() rejection due to no user interaction
         if (playPromise !== undefined) {
           playPromise.catch((error) => {
-            // Auto-play prevented - we'll silently handle this
-            // The user will need to interact with the page first
-            console.log(
-              "Audio playback required user interaction first:",
-              error
-            );
+            console.log("Audio playback required user interaction first:", error);
           });
         }
       }

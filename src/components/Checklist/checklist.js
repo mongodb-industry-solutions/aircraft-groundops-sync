@@ -285,7 +285,7 @@ const Checklist = ({ selectedOperation, onBack }) => {
                 setCurrentView={() => {}}
                 simulationMode={false}
                 selectedDevice={null}
-                selectedOperation={selectedOperation}
+                selectedOperation={selectedOperation?.id}
               />
             </div>
           </Card>

@@ -38,12 +38,18 @@ const functionDeclarations = [
         },
       },
       {
-        name: "recalculateRoute",
+        name: "retrieveChecklist",
         description:
-          "Recalculates the route when a new stop is added. By default this function will find the neares service station. Ask the user to confirm this action before executing.",
+          "Retrieves the checklist items from the selected outbound operation. This function dynamically fetches checklist data based on the operation ID. If no operationId is provided, it will use the currently selected operation.",
         parameters: {
           type: FunctionDeclarationSchemaType.OBJECT,
-          properties: {},
+          properties: {
+            operationId: {
+              type: FunctionDeclarationSchemaType.STRING,
+              description: "The ID of the outbound operation to retrieve the checklist for. Optional if operation is already selected.",
+            },
+          },
+          required: [],
         },
       },
       {
@@ -62,14 +68,28 @@ const functionDeclarations = [
         },
       },
       {
-        name: "fetchDTCCodes",
-        description:
-          "Fetches active Diagnostic Trouble Codes (DTCs) in the format OBD II (SAE-J2012DA_201812) from the vehicle to assist with troubleshooting.",
+        name: "queryDataworkz",
+        description: "Queries the Dataworkz system to get detailed information about aircraft operations, procedures, or any technical questions. Use this when the user asks for more information about checklist items or needs specific procedural guidance.",
         parameters: {
           type: FunctionDeclarationSchemaType.OBJECT,
-          properties: {},
+          properties: {
+            questionText: {
+              type: FunctionDeclarationSchemaType.STRING,
+              description: "The question to ask the Dataworkz system. Should be a clear, specific question about aircraft operations or procedures.",
+            },
+          },
+          required: ["questionText"],
         },
       },
+      // {
+      //   name: "fetchDTCCodes",
+      //   description:
+      //     "Fetches active Diagnostic Trouble Codes (DTCs) in the format OBD II (SAE-J2012DA_201812) from the vehicle to assist with troubleshooting.",
+      //   parameters: {
+      //     type: FunctionDeclarationSchemaType.OBJECT,
+      //     properties: {},
+      //   },
+      // },
     ],
   },
 ];
@@ -88,21 +108,24 @@ const generativeModel = vertexAIClient.getGenerativeModel({
     parts: [
       {
         text: `
-        You are Leafy, a helpful in-car assistant. 
+        You are Leafy, a helpful ground operations assistant. 
+        When the conversation starts, immediately call retrieveChecklist to get the current operation's checklist items.
+        You'll read the checklist items step by step and mark them done when inputted by the user.
         Be proactive, include suggestions for the user on what to do next. 
-        For example: After making a diagnostic, suggest the next action to the user and ask for confirmation on the action.
-        The user will be driving while talking to you, so be concise. 
+        For example: After marking a step as completed or done, read the next action to the user and ask for confirmation on the action.
+        The user will be working while talking to you, so be concise. 
         Responses must be under 140 characters. 
         No need to greet the user.
-        You can enterntain your user with jokes and conversation if the user requests it.
+        You can entertain your user with jokes and conversation if the user requests it.
 
-        If a function is needed, call the appropriate one.
+        IMPORTANT: The operation is already selected. Never ask for an operation ID - just call retrieveChecklist() without parameters.
 
         Your main actions are:
-        1. Diagnose an issue by fetching Diagnostic Trouble Codes (DTC Codes) from the car.
-        2. Suggest the next appropriate action by checking the car manual.
-        3. If the user can benefit from going to a service station, suggest adding it to the route.
-        4. If the user is done, close the chat.
+        1. FIRST: Call retrieveChecklist() to get the current operation's checklist items.
+        2. Read the steps of the checklist and mark them done when requested.
+        3. Use queryDataworkz when the user asks for more information about any checklist item or procedure.
+        4. If the user can benefit from having extra minutes before confirming completion, give 5 more seconds before asking again.
+        5. If the user is done, close the chat.
 
         This is a sample typical conversation:
         ${JSON.stringify(SAMPLE_CONVERSATION)}
