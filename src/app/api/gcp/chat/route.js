@@ -5,22 +5,50 @@ import { clientPromise } from "@/lib/mongodb";
 export async function POST(req) {
   try {
     const { sessionId, message } = await req.json();
-    // Added by gio to ensure sessionId is provided
     console.log("Received sessionId:", sessionId);
     console.log("Received message:", message);
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: "sessionId is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!message) {
+      return NextResponse.json(
+        { error: "message is required" },
+        { status: 400 }
+      );
+    }
+
+    let messageToSend;
+    if (typeof message === 'string') {
+      if (message.trim().length === 0) {
+        return NextResponse.json(
+          { error: "message cannot be empty" },
+          { status: 400 }
+        );
+      }
+      messageToSend = message.trim();
+    } else if (Array.isArray(message)) {
+      messageToSend = message;
+    } else {
+      return NextResponse.json(
+        { error: "message must be a string or function response array" },
+        { status: 400 }
+      );
+    }
 
     const chat = startChatSession(sessionId);
     console.log("chat session started:", chat);
 
-    const result = await chat.sendMessageStream(message);
+    const result = await chat.sendMessageStream(messageToSend);
     console.log("Received result from chat:", result);
-
-    // End block of code added by Gio
     
     let functionCall = null;
     let assistantResponse = "";
 
-    // Create a stream response
     const stream = new ReadableStream({
       async start(controller) {
         try {
@@ -41,7 +69,6 @@ export async function POST(req) {
             await result.response;
             const { name, args } = functionCall;
 
-            // Client-side function calls (handled in frontend)
             controller.enqueue(JSON.stringify({ functionCall }));
           }
 
@@ -57,7 +84,7 @@ export async function POST(req) {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache",
-        "X-Accel-Buffering": "no", // Ensure streaming works correctly
+        "X-Accel-Buffering": "no",
       },
     });
   } catch (error) {

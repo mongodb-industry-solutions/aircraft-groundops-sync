@@ -10,8 +10,13 @@
 .conversationContainer {
   flex-grow: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 10px;
   border-radius: 10px;
   scrollbar-width: thin;
   scrollbar-color: #444 #222;
+  max-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
 }

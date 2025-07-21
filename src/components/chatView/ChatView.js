@@ -7,42 +7,16 @@ import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
 
-
-const handleTextToSpeech = async (text) => {
-  try {
-    const audioResponse = await fetch("/api/gcp/textToSpeech", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-
-    const { audioContent } = await audioResponse.json();
-
-    if (audioContent) {
-      const audio = new Audio(`data:audio/wav;base64,${audioContent}`);
-      const playPromise = audio.play();
-
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Audio playback required user interaction first:", error);
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Error in text-to-speech:", error);
-  }
-};
-
-
 const ChatView = ({
   setCurrentView,
   simulationMode,
   selectedDevice,
   selectedOperation,
+  onStepCompleted, 
 }) => {
   const chatEndRef = useRef(null);
   const [messagesToShow, setMessagesToShow] = useState([]);
-  const [isTyping, setIsTyping] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
   const [suggestedAnswer, setSuggestedAnswer] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [writerMode, setWriterMode] = useState(false);
@@ -60,31 +34,36 @@ const ChatView = ({
     setSuggestedAnswer,
   });
 
-  const { handleLLMResponse, startRecording, stopRecording } = useChat({
+  const { handleLLMResponse, startRecording, stopRecording, isPlayingTTS, handleTextToSpeech } = useChat({
     setCurrentView,
     setMessagesToShow,
     setIsTyping,
     setIsRecording,
+    isRecording,
     selectedDevice,
     isSpeakerMuted,
     selectedOperation,
+    onStepCompleted, 
   });
 
   useEffect(() => {
     if (simulationMode) {
       startConversationSimulation();
     } else {
-      setMessagesToShow([DEFAULT_GREETINGS]);
-      typeMessageSimulate(DEFAULT_GREETINGS, 0);
-      
-      // If we have a selected operation, automatically trigger checklist retrieval
-      if (selectedOperation) {
+      if (messagesToShow.length === 0) {
+        setMessagesToShow([DEFAULT_GREETINGS]);
+        setIsTyping(false);
         setTimeout(() => {
-          handleLLMResponse("Start checklist");
-        }, 1000);
+          if (!isSpeakerMuted) {
+            handleTextToSpeech(DEFAULT_GREETINGS.text);
+          }
+        }, 500);
       }
     }
-  }, [simulationMode, startConversationSimulation, typeMessageSimulate, selectedOperation]);
+  }, [simulationMode, selectedOperation, messagesToShow.length, isSpeakerMuted, handleTextToSpeech]);
+
+  useEffect(() => {
+  }, [selectedOperation]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -109,7 +88,7 @@ const ChatView = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionText: text }),
       });
-      
+
       let answer = "No answer found.";
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -144,10 +123,27 @@ const ChatView = ({
   };
 
   useEffect(() => {
-    if (!simulationMode && !isTyping && !isRecording && !writerMode) {
-      startRecording();
+    if (!simulationMode && !isTyping && !isRecording && !writerMode && messagesToShow.length > 0) {
+      
+      const checkTTSAndStartRecording = () => {
+        const isTTSPlaying = isPlayingTTS ? isPlayingTTS() : false;
+        
+        if (isTTSPlaying) {
+          setTimeout(checkTTSAndStartRecording, 500);
+        } else {
+          setTimeout(() => {
+            if (!simulationMode && !isTyping && !isRecording && !writerMode) {
+              startRecording();
+            }
+          }, 1000); // 1-second delay after text to speech ends 
+        }
+      };
+      
+      const timer = setTimeout(checkTTSAndStartRecording, 1000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isTyping, simulationMode]);
+  }, [isTyping, simulationMode, isRecording, writerMode, messagesToShow.length, isPlayingTTS, startRecording]);
 
   return (
     <div className={styles.chatViewContainer}>

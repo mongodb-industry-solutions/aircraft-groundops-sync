@@ -59,6 +59,31 @@ const Checklist = ({ selectedOperation, onBack }) => {
     }));
   };
 
+  const handleStepCompleted = (stepNumber, stepText) => {
+    if (!checklistData?.checklist) return;
+    
+    const checklistItem = checklistData.checklist.find(item => 
+      item.order === stepNumber || 
+      (item.order === undefined && checklistData.checklist.indexOf(item) + 1 === stepNumber)
+    );
+    
+    if (checklistItem) {
+      const orderKey = checklistItem.order !== undefined 
+        ? checklistItem.order 
+        : checklistData.checklist.indexOf(checklistItem);
+      const itemId = `main_${orderKey}`;
+      
+      console.log(`Marking step ${stepNumber} as completed (itemId: ${itemId})`);
+      
+      setCompletedItems(prev => ({
+        ...prev,
+        [itemId]: true
+      }));
+    } else {
+      console.warn(`Could not find checklist item for step ${stepNumber}`);
+    }
+  };
+
   const getCompletionStats = () => {
     if (!checklistData) return { completed: 0, total: 0, percentage: 0 };
     
@@ -286,6 +311,7 @@ const Checklist = ({ selectedOperation, onBack }) => {
                 simulationMode={false}
                 selectedDevice={null}
                 selectedOperation={selectedOperation?.id}
+                onStepCompleted={handleStepCompleted}
               />
             </div>
           </Card>

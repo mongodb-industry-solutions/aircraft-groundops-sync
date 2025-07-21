@@ -1,62 +1,61 @@
 export const DEFAULT_GREETINGS = {
   sender: "assistant",
-  text: "Ready to start your checklist! Let me get the items for you.",
+  text: "Hi, I'm Leafy, how can I help you today?",
 };
 
 export const SAMPLE_CONVERSATION = [
   {
     sender: "assistant",
-    text: "Ready to start your checklist! Let me get the items for you.",
+    text: "Would you like to begin your Outbound Operation checklist?"
+  },
+  { 
+    sender: "user", 
+    text: "Yes" 
   },
   { sender: "assistant", tool: "retrieveChecklist" },
   {
     sender: "assistant",
-    text: "Let's begin your Outbound Operation's checklist",
-  },
-  {
-    sender: "assistant",
-    text: "The first step is: {Read the checklist in steps order}, please confirm completion"
+    text: "Step 1: {Read the first main checklist item}, please confirm completion"
   },
   { 
     sender: "user", text: "Done" 
   },
+  { sender: "assistant", tool: "markStepCompleted" },
   {
     sender: "assistant",
-    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
+    text: "Step 2: {Read the next main checklist item}, please confirm completion"
   },
   { 
     sender: "user", text: "Check" 
   },
+  { sender: "assistant", tool: "markStepCompleted" },
   {
     sender: "assistant",
-    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
+    text: "Step 3: {Read the next main checklist item}, please confirm completion"
   },
   { 
     sender: "user", text: "Completed" 
   },
+  { sender: "assistant", tool: "markStepCompleted" },
   {
     sender: "assistant",
-    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
+    text: "Step 4: {Read the next main checklist item}, please confirm completion"
   },
   { sender: "user", text: "Done" },
+  { sender: "assistant", tool: "markStepCompleted" },
   {
     sender: "assistant",
-    text: "Step {next number step} : {Read the checklist in steps order}, please confirm completion"
-  },
-  { sender: "user", text: "Check" },
-  {
-    sender: "assistant",
-    text: "Done! You've completed your Outbound Operation's checklist. If you need further assistance, let me know!",
+    text: "Excellent! You've completed your Outbound Operation checklist. Need anything else?"
   },
   { sender: "user", text: "What does step 3 involve exactly?" },
   { sender: "assistant", tool: "queryDataworkz" },
-    {
+  {
     sender: "assistant",
-    text: "Do you need further assistance?"
+    text: "Step 3 involves {detailed explanation}. Do you need further assistance?"
   },
   {
     sender: "user",
-    text: "No, that's all. Thanks!",
+    text: "No, that's all. Thanks!"
   },
   { sender: "assistant", tool: "closeChat" },
 ];
