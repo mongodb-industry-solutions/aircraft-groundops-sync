@@ -8,12 +8,13 @@ import Icon from '@leafygreen-ui/icon';
 import ChatView from '@/components/chatView/ChatView';
 import styles from './checklist.module.css';
 
-const Checklist = ({ selectedOperation, onBack }) => {
+const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onChecklistCompleted }) => {
   const [checklistData, setChecklistData] = useState(null);
   const [completedItems, setCompletedItems] = useState({});
   const [priorOpen, setPriorOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [assistantCompletedItems, setAssistantCompletedItems] = useState(new Set());
 
   useEffect(() => {
     const fetchChecklistData = async () => {
@@ -21,6 +22,8 @@ const Checklist = ({ selectedOperation, onBack }) => {
       
       setLoading(true);
       setError(null);
+      setCompletedItems({});
+      setAssistantCompletedItems(new Set());
       
       try {
         console.log('Fetching checklist for operation:', selectedOperation.id);
@@ -52,11 +55,67 @@ const Checklist = ({ selectedOperation, onBack }) => {
     fetchChecklistData();
   }, [selectedOperation]);
 
+  // notify when checklist is completed
+  useEffect(() => {
+    if (!checklistData) return;
+    
+    const stats = getCompletionStats();
+    if (stats.percentage === 100 && stats.total > 0) {
+      console.log('Checklist completed! Notifying...');
+      if (onChecklistCompleted) {
+        onChecklistCompleted(checklistData.operationTitle);
+      }
+      
+      // Also call the global handler for the ChatView assistant
+      if (window.handleChecklistCompletion) {
+        window.handleChecklistCompletion(checklistData.operationTitle);
+      }
+    }
+  }, [completedItems, checklistData, onChecklistCompleted]);
+
   const handleItemComplete = (itemId) => {
-    setCompletedItems(prev => ({
-      ...prev,
-      [itemId]: !prev[itemId]
-    }));
+    setCompletedItems(prev => {
+      const newState = {
+        ...prev,
+        [itemId]: !prev[itemId]
+      };
+      
+      // Check if this was a manual completion 
+      if (!prev[itemId]) { 
+        const isMainItem = itemId.startsWith('main_');
+        if (isMainItem) {
+          // Check if this completion was triggered by the assistant
+          if (assistantCompletedItems.has(itemId)) {
+            setAssistantCompletedItems(prevSet => {
+              const newSet = new Set(prevSet);
+              newSet.delete(itemId);
+              return newSet;
+            });
+            return newState;
+          }
+          
+          const stepNumber = parseInt(itemId.replace('main_', ''));
+          const stepItem = checklistData?.checklist?.find(item => 
+            item.order === stepNumber || 
+            (item.order === undefined && checklistData.checklist.indexOf(item) === stepNumber)
+          );
+          
+          if (stepItem) {
+            console.log(`Manual completion detected for step ${stepNumber}: ${stepItem.step}`);
+            
+            if (onManualStepCompleted) {
+              onManualStepCompleted(stepNumber, stepItem.step);
+            }
+            
+            if (window.handleManualStepCompletion) {
+              window.handleManualStepCompletion(stepNumber, stepItem.step);
+            }
+          }
+        }
+      }
+      
+      return newState;
+    });
   };
 
   const handleStepCompleted = (stepNumber, stepText) => {
@@ -73,7 +132,9 @@ const Checklist = ({ selectedOperation, onBack }) => {
         : checklistData.checklist.indexOf(checklistItem);
       const itemId = `main_${orderKey}`;
       
-      console.log(`Marking step ${stepNumber} as completed (itemId: ${itemId})`);
+      console.log(`Assistant completing step ${stepNumber} (itemId: ${itemId})`);
+      
+      setAssistantCompletedItems(prev => new Set(prev).add(itemId));
       
       setCompletedItems(prev => ({
         ...prev,
@@ -120,7 +181,6 @@ const Checklist = ({ selectedOperation, onBack }) => {
             </thead>
             <tbody>
               {sortedItems.map((item, index) => {
-                // Ensure unique key by using index as fallback if order is undefined
                 const orderKey = item.order !== undefined ? item.order : index;
                 const itemId = `${tableId}_${orderKey}`;
                 const isCompleted = completedItems[itemId];
@@ -310,8 +370,10 @@ const Checklist = ({ selectedOperation, onBack }) => {
                 setCurrentView={() => {}}
                 simulationMode={false}
                 selectedDevice={null}
-                selectedOperation={selectedOperation?.id}
+                selectedOperation={selectedOperation}
                 onStepCompleted={handleStepCompleted}
+                onManualStepCompleted={onManualStepCompleted}
+                onChecklistCompleted={onChecklistCompleted}
               />
             </div>
           </Card>

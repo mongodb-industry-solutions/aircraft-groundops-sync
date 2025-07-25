@@ -1,21 +1,36 @@
 export const DEFAULT_GREETINGS = {
   sender: "assistant",
-  text: "Hi, I'm Leafy, how can I help you today?",
+  text: "Hi, I'm Leafy, would you like to make a question or begin your voice checklist?",
 };
 
 export const SAMPLE_CONVERSATION = [
+  // Question scenario
+  { 
+    sender: "user", 
+    text: "Tell me about the APU"
+  },
+  { sender: "assistant", tool: "queryDataworkz" },
   {
     sender: "assistant",
-    text: "Would you like to begin your Outbound Operation checklist?"
+    text: "Based on the manual: {dynamic answer from Dataworkz}. Would you like to ask another question or begin your checklist?"
   },
   { 
     sender: "user", 
-    text: "Yes" 
+    text: "I have a question" 
+  },
+  {
+    sender: "assistant",
+    text: "Great, what would you like to know?"
+  },
+  // Checklist scenario
+  { 
+    sender: "user", 
+    text: "Begin checklist" 
   },
   { sender: "assistant", tool: "retrieveChecklist" },
   {
     sender: "assistant",
-    text: "Step 1: {Read the first main checklist item}, please confirm completion"
+    text: "Step 1: GSE and passenger stairs detached; stand clear of obstructions, please confirm completion"
   },
   { 
     sender: "user", text: "Done" 
@@ -26,32 +41,26 @@ export const SAMPLE_CONVERSATION = [
     text: "Step 2: {Read the next main checklist item}, please confirm completion"
   },
   { 
-    sender: "user", text: "Check" 
+    sender: "user", text: "I'll do this manually" 
   },
-  { sender: "assistant", tool: "markStepCompleted" },
+  { sender: "assistant", tool: "switchToManualMode" },
+  // Manual completion 
   {
     sender: "assistant",
-    text: "Step 3: {Read the next main checklist item}, please confirm completion"
+    text: "Manual checklist configuration enabled, speech stops."
   },
-  { 
-    sender: "user", text: "Completed" 
-  },
-  { sender: "assistant", tool: "markStepCompleted" },
   {
     sender: "assistant",
-    text: "Step 4: {Read the next main checklist item}, please confirm completion"
+    text: "Checklist complete! Well done. Is there anything else I can help you with today, or would you like me to close the session?"
   },
-  { sender: "user", text: "Done" },
-  { sender: "assistant", tool: "markStepCompleted" },
+  {
+    sender: "user",
+    text: "That's all, thank you"
+  },
+  { sender: "assistant", tool: "closeChat" },
   {
     sender: "assistant",
-    text: "Excellent! You've completed your Outbound Operation checklist. Need anything else?"
-  },
-  { sender: "user", text: "What does step 3 involve exactly?" },
-  { sender: "assistant", tool: "queryDataworkz" },
-  {
-    sender: "assistant",
-    text: "Step 3 involves {detailed explanation}. Do you need further assistance?"
+    text: "You're welcome! Have a great day."
   },
   {
     sender: "user",

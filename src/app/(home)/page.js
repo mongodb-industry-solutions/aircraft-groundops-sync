@@ -3,7 +3,6 @@
 import styles from "./page.module.css";
 import { useState } from "react";
 import { H1 } from "@leafygreen-ui/typography";
-import ChatView from "@/components/chatView/ChatView";
 import InfoWizard from "@/components/InfoWizard/InfoWizard";
 import LogConsole from "@/components/logConsole/LogConsole";
 import OutboundOps from "@/components/OutboundOps/OutboundOps";
@@ -17,13 +16,10 @@ export default function Home() {
   const [userSelected, setUserSelected] = useState(false);
   const [operationSelected, setOperationSelected] = useState(false);
   const [selectedOperation, setSelectedOperation] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [simulationMode, setSimulationMode] = useState(false);
   const [openHelpModal, setOpenHelpModal] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState(null);
-  const [currentView, setCurrentView] = useState("navigation");
-  const [showChatView, setShowChatView] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
+  const [checklistCompleted, setChecklistCompleted] = useState(false);
 
   const handleUserSelected = () => {
     setUserSelected(true);
@@ -32,6 +28,13 @@ export default function Home() {
   const handleOperationSelected = (operation) => {
     setSelectedOperation(operation);
     setOperationSelected(true);
+    setShowChecklist(true); 
+    setChecklistCompleted(false);
+  };
+
+  const handleChecklistCompleted = (operationTitle) => {
+    console.log(`Manual checklist completed for: ${operationTitle}`);
+    setChecklistCompleted(true);
   };
 
   return (
@@ -48,7 +51,6 @@ export default function Home() {
                 onClick={() => {
                   setOperationSelected(false);
                   setSelectedOperation(null);
-                  setShowChatView(false);
                   setShowChecklist(false);
                 }}
                 className={styles.backButton}
@@ -65,39 +67,42 @@ export default function Home() {
             iconGlyph="Wizard"
           />
 
-          {!showChatView && !showChecklist ? (
-            <div className={styles.openAssistantButton}>
-              <button
-                onClick={() => setShowChatView(true)}
-                className={styles.assistantButton}
-              >
-                Open Assistant for {selectedOperation?.title}
-              </button>
-              <button
-                onClick={() => setShowChecklist(true)}
-                className={styles.checklistButton}
-              >
-                View Checklist for {selectedOperation?.title}
-              </button>
-            </div>
-          ) : showChecklist ? (
+          <div>
             <Checklist 
               selectedOperation={selectedOperation}
-              onBack={() => setShowChecklist(false)}
-            />
-          ) : (
-            <ChatView
-              setCurrentView={(view) => {
-                setCurrentView(view);
-                if (view === "navigation") {
-                  setShowChatView(false);
-                }
+              onBack={() => {
+                setOperationSelected(false);
+                setSelectedOperation(null);
+                setShowChecklist(false);
+                setChecklistCompleted(false);
               }}
-              simulationMode={simulationMode}
-              selectedDevice={selectedDevice}
-              selectedOperation={selectedOperation}
+              onManualStepCompleted={(stepNumber, stepText) => {
+                console.log(`Manual step completed: ${stepNumber} - ${stepText}`);
+              }}
+              onChecklistCompleted={handleChecklistCompleted}
             />
-          )}
+            {checklistCompleted && (
+              <div className={styles.completionOptions}>
+                <div className={styles.completionMessage}>
+                  <h3>Checklist Complete! 🎉</h3>
+                  <p>Great job! Your checklist has been completed successfully.</p>
+                </div>
+                <div className={styles.nextSteps}>
+                  <button
+                    onClick={() => {
+                      setOperationSelected(false);
+                      setSelectedOperation(null);
+                      setShowChecklist(false);
+                      setChecklistCompleted(false);
+                    }}
+                    className={styles.backButton}
+                  >
+                    Back to Main Menu
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           <LogConsole simulationMode={simulationMode} />
         </div>

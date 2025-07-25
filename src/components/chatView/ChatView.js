@@ -12,7 +12,10 @@ const ChatView = ({
   simulationMode,
   selectedDevice,
   selectedOperation,
-  onStepCompleted, 
+  onStepCompleted,
+  onManualStepCompleted,
+  onChecklistCompleted,
+  checklistCompleted = false,
 }) => {
   const chatEndRef = useRef(null);
   const [messagesToShow, setMessagesToShow] = useState([]);
@@ -22,6 +25,7 @@ const ChatView = ({
   const [writerMode, setWriterMode] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [isLoadingDataworkz, setIsLoadingDataworkz] = useState(false);
+  const [isManualMode, setIsManualMode] = useState(false);
 
   const {
     handleNextMessageSimulate,
@@ -43,7 +47,11 @@ const ChatView = ({
     selectedDevice,
     isSpeakerMuted,
     selectedOperation,
-    onStepCompleted, 
+    onStepCompleted,
+    onManualStepCompleted,
+    onChecklistCompleted,
+    isManualMode,
+    setIsManualMode,
   });
 
   useEffect(() => {
@@ -61,6 +69,17 @@ const ChatView = ({
       }
     }
   }, [simulationMode, selectedOperation, messagesToShow.length, isSpeakerMuted, handleTextToSpeech]);
+
+  useEffect(() => {
+    if (checklistCompleted && !simulationMode && messagesToShow.length > 0 && !isRecording) {
+      console.log("Auto-starting recording after checklist completion");
+      setTimeout(() => {
+        if (!isRecording && !isPlayingTTS) {
+          startRecording();
+        }
+      }, 1500);
+    }
+  }, [checklistCompleted, simulationMode, messagesToShow.length, isRecording, isPlayingTTS, startRecording]);
 
   useEffect(() => {
   }, [selectedOperation]);
@@ -123,7 +142,7 @@ const ChatView = ({
   };
 
   useEffect(() => {
-    if (!simulationMode && !isTyping && !isRecording && !writerMode && messagesToShow.length > 0) {
+    if (!simulationMode && !isTyping && !isRecording && !writerMode && !isManualMode && messagesToShow.length > 0) {
       
       const checkTTSAndStartRecording = () => {
         const isTTSPlaying = isPlayingTTS ? isPlayingTTS() : false;
@@ -132,10 +151,10 @@ const ChatView = ({
           setTimeout(checkTTSAndStartRecording, 500);
         } else {
           setTimeout(() => {
-            if (!simulationMode && !isTyping && !isRecording && !writerMode) {
+            if (!simulationMode && !isTyping && !isRecording && !writerMode && !isManualMode) {
               startRecording();
             }
-          }, 1000); // 1-second delay after text to speech ends 
+          }, 500); // half second delay after text to speech ends 
         }
       };
       
@@ -143,7 +162,7 @@ const ChatView = ({
       
       return () => clearTimeout(timer);
     }
-  }, [isTyping, simulationMode, isRecording, writerMode, messagesToShow.length, isPlayingTTS, startRecording]);
+  }, [isTyping, simulationMode, isRecording, writerMode, isManualMode, messagesToShow.length, isPlayingTTS, startRecording]);
 
   return (
     <div className={styles.chatViewContainer}>

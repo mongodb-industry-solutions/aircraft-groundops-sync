@@ -7,16 +7,16 @@
 
 .togglesContainer {
   display: flex;
-  justify-content: space-evenly; /* Even spacing across the width */
-  align-items: center; /* Ensure vertical alignment */
+  justify-content: space-evenly;
+  align-items: center; 
   width: 100%;
-  gap: 20px; /* Space between toggle-label pairs */
+  gap: 20px; 
 }
 
 .toggleGroup {
   display: flex;
-  align-items: center; /* Ensures label and toggle are aligned */
-  gap: 8px; /* Space between label and toggle */
+  align-items: center;
+  gap: 8px;
 }
 
 .writerContainer {

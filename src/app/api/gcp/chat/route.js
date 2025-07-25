@@ -32,7 +32,26 @@ export async function POST(req) {
       }
       messageToSend = message.trim();
     } else if (Array.isArray(message)) {
-      messageToSend = message;
+      // Validate function response format
+      if (message.length > 0 && message[0].functionResponse) {
+        // Validate the function response structure
+        const functionResponse = message[0].functionResponse;
+        if (!functionResponse.name || !functionResponse.response) {
+          console.error("Invalid function response structure:", functionResponse);
+          return NextResponse.json(
+            { error: "Function response must have name and response fields" },
+            { status: 400 }
+          );
+        }
+        messageToSend = message;
+        console.log("Validated function response:", JSON.stringify(messageToSend, null, 2));
+      } else {
+        console.error("Invalid function response format:", message);
+        return NextResponse.json(
+          { error: "Invalid function response format" },
+          { status: 400 }
+        );
+      }
     } else {
       return NextResponse.json(
         { error: "message must be a string or function response array" },
@@ -40,11 +59,27 @@ export async function POST(req) {
       );
     }
 
+    console.log("Message to send to VertexAI:", JSON.stringify(messageToSend, null, 2));
+
     const chat = startChatSession(sessionId);
     console.log("chat session started:", chat);
 
-    const result = await chat.sendMessageStream(messageToSend);
-    console.log("Received result from chat:", result);
+    let result;
+    try {
+      result = await chat.sendMessageStream(messageToSend);
+      console.log("Received result from chat:", result);
+    } catch (vertexError) {
+      console.error("VertexAI sendMessageStream error:", vertexError);
+      return NextResponse.json(
+        { 
+          error: "VertexAI API error", 
+          details: vertexError.message,
+          messageType: typeof messageToSend,
+          messageLength: Array.isArray(messageToSend) ? messageToSend.length : messageToSend?.length
+        },
+        { status: 500 }
+      );
+    }
     
     let functionCall = null;
     let assistantResponse = "";
