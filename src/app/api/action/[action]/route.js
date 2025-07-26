@@ -11,7 +11,17 @@ export async function POST(req, { params }) {
     const database = process.env.DATABASE_NAME;
 
     const { action } = await params;
-    const body = await req.json();
+    
+    let body;
+    try {
+      body = await req.json();
+    } catch (jsonError) {
+      console.error('Error parsing JSON body:', jsonError);
+      return NextResponse.json(
+        { error: "Invalid JSON in request body" },
+        { status: 400 }
+      );
+    }
 
     const {
       collection,

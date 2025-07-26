@@ -66,7 +66,6 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
         onChecklistCompleted(checklistData.operationTitle);
       }
       
-      // Also call the global handler for the ChatView assistant
       if (window.handleChecklistCompletion) {
         window.handleChecklistCompletion(checklistData.operationTitle);
       }

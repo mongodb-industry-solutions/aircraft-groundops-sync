@@ -166,7 +166,7 @@ const ChatView = ({
 
   return (
     <div className={styles.chatViewContainer}>
-      <div className={styles.conversationContainer}>
+      <div className={`${styles.conversationContainer} ${selectedOperation ? styles.checklistContext : ''}`}>
         {messagesToShow.map((msg, index) => (
           <Message
             key={index}

@@ -2,7 +2,6 @@
 
 import styles from "./page.module.css";
 import { useState } from "react";
-import { H1 } from "@leafygreen-ui/typography";
 import InfoWizard from "@/components/InfoWizard/InfoWizard";
 import LogConsole from "@/components/logConsole/LogConsole";
 import OutboundOps from "@/components/OutboundOps/OutboundOps";
@@ -16,9 +15,7 @@ export default function Home() {
   const [userSelected, setUserSelected] = useState(false);
   const [operationSelected, setOperationSelected] = useState(false);
   const [selectedOperation, setSelectedOperation] = useState(null);
-  const [simulationMode, setSimulationMode] = useState(false);
   const [openHelpModal, setOpenHelpModal] = useState(false);
-  const [showChecklist, setShowChecklist] = useState(false);
   const [checklistCompleted, setChecklistCompleted] = useState(false);
 
   const handleUserSelected = () => {
@@ -28,8 +25,7 @@ export default function Home() {
   const handleOperationSelected = (operation) => {
     setSelectedOperation(operation);
     setOperationSelected(true);
-    setShowChecklist(true); 
-    setChecklistCompleted(false);
+    setChecklistCompleted(false); // Reset completion state for new operation
   };
 
   const handleChecklistCompleted = (operationTitle) => {
@@ -44,22 +40,7 @@ export default function Home() {
         <OutboundOps onOperationSelected={handleOperationSelected} />
       )}
       {userSelected && operationSelected && (
-        <div className={styles.page} style={{ color: "black" }}>
-          <div className={styles.header}>
-            <div className={styles.headerControls}>
-              <button
-                onClick={() => {
-                  setOperationSelected(false);
-                  setSelectedOperation(null);
-                  setShowChecklist(false);
-                }}
-                className={styles.backButton}
-              >
-                ← Change Operation
-              </button>
-            </div>
-            <H1>Aircraft Ground Operations - {selectedOperation?.title}</H1>
-          </div>
+        <div className={styles.page}>
           <InfoWizard
             open={openHelpModal}
             setOpen={setOpenHelpModal}
@@ -67,44 +48,40 @@ export default function Home() {
             iconGlyph="Wizard"
           />
 
-          <div>
-            <Checklist 
-              selectedOperation={selectedOperation}
-              onBack={() => {
-                setOperationSelected(false);
-                setSelectedOperation(null);
-                setShowChecklist(false);
-                setChecklistCompleted(false);
-              }}
-              onManualStepCompleted={(stepNumber, stepText) => {
-                console.log(`Manual step completed: ${stepNumber} - ${stepText}`);
-              }}
-              onChecklistCompleted={handleChecklistCompleted}
-            />
-            {checklistCompleted && (
-              <div className={styles.completionOptions}>
-                <div className={styles.completionMessage}>
-                  <h3>Checklist Complete! 🎉</h3>
-                  <p>Great job! Your checklist has been completed successfully.</p>
-                </div>
-                <div className={styles.nextSteps}>
-                  <button
-                    onClick={() => {
-                      setOperationSelected(false);
-                      setSelectedOperation(null);
-                      setShowChecklist(false);
-                      setChecklistCompleted(false);
-                    }}
-                    className={styles.backButton}
-                  >
-                    Back to Main Menu
-                  </button>
-                </div>
+          <Checklist 
+            selectedOperation={selectedOperation}
+            onBack={() => {
+              setOperationSelected(false);
+              setSelectedOperation(null);
+              setChecklistCompleted(false);
+            }}
+            onManualStepCompleted={(stepNumber, stepText) => {
+              console.log(`Manual step completed: ${stepNumber} - ${stepText}`);
+            }}
+            onChecklistCompleted={handleChecklistCompleted}
+          />
+          {checklistCompleted && (
+            <div className={styles.completionOptions}>
+              <div className={styles.completionMessage}>
+                <h3>Checklist Complete! 🎉</h3>
+                <p>Great job! Your checklist has been completed successfully.</p>
               </div>
-            )}
-          </div>
+              <div className={styles.nextSteps}>
+                <button
+                  onClick={() => {
+                    setOperationSelected(false);
+                    setSelectedOperation(null);
+                    setChecklistCompleted(false);
+                  }}
+                  className={styles.backButton}
+                >
+                  Back to Main Menu
+                </button>
+              </div>
+            </div>
+          )}
 
-          <LogConsole simulationMode={simulationMode} />
+          <LogConsole simulationMode={false} />
         </div>
       )}
     </>

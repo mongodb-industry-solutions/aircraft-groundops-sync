@@ -58,14 +58,14 @@ const InfotainmentScreen = ({
               simulationMode={simulationMode}
               selectedDevice={selectedDevice}
             />{" "}
-            <NavigationView
+            {/* <NavigationView
               isFullScreen={false}
               isPlaying={isPlaying}
               setIsPlaying={setIsPlaying}
               currentTime={currentTime}
               setCurrentTime={setCurrentTime}
               isRecalculating={isRecalculating}
-            />
+            /> */}
           </>
         )}
         {currentView === "options" && (

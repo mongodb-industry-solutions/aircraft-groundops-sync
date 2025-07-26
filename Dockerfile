@@ -1,40 +1,20 @@
-FROM node:22-alpine AS base 
+# Stage 1: Build the application
+FROM node:23.11.1 AS build
 
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
+# Set the working directory
 WORKDIR /app
+
+# Copy package.json and package-lock.json (or yarn.lock) files
 COPY package*.json ./
-RUN npm ci
 
-FROM base AS builder
-WORKDIR /app
+# Install dependencies (you mentioned using --legacy-peer-deps)
+RUN npm install --legacy-peer-deps
 
-COPY --from=deps /app/node_modules ./node_modules
+# Copy the rest of the application code
 COPY . .
-
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
-
-RUN npm run build
-
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/.env.production ./.env.production
-
-USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-
-CMD ["npm", "start"]
+# Command to run the application
+# CMD ["npm", "run", "dev", "--prefix", "/app/src"]
+CMD ["npm", "run", "dev"]
