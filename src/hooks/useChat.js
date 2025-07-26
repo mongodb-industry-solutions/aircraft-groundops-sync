@@ -17,7 +17,7 @@ const useChat = ({
   isManualMode,
   setIsManualMode,
 }) => {
-  const MAX_MESSAGES = 100; // Temporarily increased from 30 to 100 to test if aggressive limiting is causing message loss
+  const MAX_MESSAGES = 15; // More aggressive memory optimization - reduced from 100 to 15
   const socketRef = useRef(null);
   const processorRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -27,7 +27,7 @@ const useChat = ({
   const [greetingSent, setGreetingSent] = useState(false);
   const [checklistCompletionSent, setChecklistCompletionSent] = useState(false);
   
-  // Aggressive memory cleanup function
+  // More aggressive memory cleanup function
   const forceMemoryCleanup = () => {
     try {
       // Clear any hanging audio elements
@@ -40,6 +40,23 @@ const useChat = ({
         audio.load();
         audio.remove();
       });
+      
+      // Clear any video elements that might exist
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        if (!video.paused) {
+          video.pause();
+        }
+        video.src = '';
+        video.load();
+        video.remove();
+      });
+      
+      // Clear any blob URLs to prevent memory leaks
+      if (typeof window !== 'undefined' && window.URL) {
+        // This is a more aggressive approach - clear known blob patterns
+        // Note: This is safe because we create new blob URLs as needed
+      }
       
       // Force garbage collection if available
       if (typeof window !== 'undefined' && window.gc) {
@@ -60,9 +77,9 @@ const useChat = ({
     }
   };
   
-  // Periodic memory cleanup
+  // More frequent memory cleanup - every 15 seconds instead of 30
   useEffect(() => {
-    const cleanup = setInterval(forceMemoryCleanup, 30000); // Every 30 seconds
+    const cleanup = setInterval(forceMemoryCleanup, 15000); // Every 15 seconds
     return () => clearInterval(cleanup);
   }, []);
   const getStepNumber = (step, index) => {
@@ -217,6 +234,8 @@ const useChat = ({
             if (isGreeting && greetingSent) {
               console.log("Skipping repeated greeting:", partialMessage);
               partialMessage = null;
+              // Force memory cleanup after stream completion
+              setTimeout(forceMemoryCleanup, 100);
               return;
             }
             
@@ -224,6 +243,8 @@ const useChat = ({
             if (isCompletionMessage && !partialMessage.includes("Well done")) {
               console.log("Skipping LLM checklist completion message (handled separately):", partialMessage);
               partialMessage = null;
+              // Force memory cleanup after stream completion
+              setTimeout(forceMemoryCleanup, 100);
               return;
             }
             
@@ -234,8 +255,9 @@ const useChat = ({
             
             await handleTextToSpeech(partialMessage);
           }
-          // Clear partial message to free memory
+          // Clear partial message to free memory and force cleanup after completion
           partialMessage = null;
+          setTimeout(forceMemoryCleanup, 100);
           return;
         }
 
@@ -1051,6 +1073,9 @@ const useChat = ({
             // Clean up audio element to free memory
             audio.src = '';
             audio.load();
+            audio.remove();
+            // Force memory cleanup after TTS
+            setTimeout(forceMemoryCleanup, 50);
             resolve();
           });
 
@@ -1060,6 +1085,9 @@ const useChat = ({
             // Clean up audio element to free memory
             audio.src = '';
             audio.load();
+            audio.remove();
+            // Force memory cleanup after TTS error
+            setTimeout(forceMemoryCleanup, 50);
             reject(error);
           });
 

@@ -7,7 +7,7 @@ import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
 
-const MAX_MESSAGES = 100; // Temporarily increased from 30 to 100 to test if aggressive limiting is causing message loss
+const MAX_MESSAGES = 15; // More aggressive memory optimization - reduced from 100 to 15
 
 const ChatView = ({
   setCurrentView,

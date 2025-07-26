@@ -136,7 +136,11 @@ const generativeModel = vertexAIClient.getGenerativeModel({
       threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
     },
   ],
-  generationConfig: { maxOutputTokens: 300 },
+  generationConfig: { 
+    maxOutputTokens: 200,  // Reduced from 300 to 200 to save memory
+    temperature: 0.7,      // Lower temperature for more focused responses
+    topP: 0.8              // Reduced for more deterministic outputs
+  },
   systemInstruction: {
     role: "system",
     parts: [
@@ -277,25 +281,48 @@ const generativeModel = vertexAIClient.getGenerativeModel({
   },
 });
 
+// Memory management: Track session creation times and periodically clean up old sessions
 let chatSessions = {};
+const sessionTimestamps = {};
+const SESSION_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
 export const startChatSession = (sessionId) => {
   if (!chatSessions[sessionId]) {
     chatSessions[sessionId] = generativeModel.startChat({
       tools: functionDeclarations,
     });
+    sessionTimestamps[sessionId] = Date.now();
   }
   return chatSessions[sessionId];
 };
 
+// Periodic cleanup of old sessions to prevent memory leaks
+const cleanupOldSessions = () => {
+  const now = Date.now();
+  const sessionIds = Object.keys(sessionTimestamps);
+  
+  sessionIds.forEach(sessionId => {
+    if (now - sessionTimestamps[sessionId] > SESSION_TIMEOUT) {
+      delete chatSessions[sessionId];
+      delete sessionTimestamps[sessionId];
+      console.log(`Auto-cleaned expired session: ${sessionId}`);
+    }
+  });
+};
+
+// Run cleanup every 5 minutes
+setInterval(cleanupOldSessions, 5 * 60 * 1000);
+
 export const clearChatSession = (sessionId) => {
   if (chatSessions[sessionId]) {
     delete chatSessions[sessionId];
+    delete sessionTimestamps[sessionId];
     console.log(`Cleared chat session: ${sessionId}`);
   }
 };
 
 export const clearAllChatSessions = () => {
   chatSessions = {};
+  Object.keys(sessionTimestamps).forEach(key => delete sessionTimestamps[key]);
   console.log('Cleared all chat sessions');
 };
