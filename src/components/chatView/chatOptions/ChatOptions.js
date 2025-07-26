@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Toggle from "@leafygreen-ui/toggle";
 import TextInput from "@leafygreen-ui/text-input";
 import Button from "@leafygreen-ui/button";
@@ -21,28 +21,49 @@ const ChatOptions = ({
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [userInput, setUserInput] = useState("");
 
-  const handleToggleRecording = () => {
+  const handleExpandMenu = useCallback(() => {
+    console.log("Expanding chat options menu");
+    setIsCollapsed(false);
+  }, []);
+
+  const handleCollapseMenu = useCallback(() => {
+    console.log("Collapsing chat options menu");
+    setIsCollapsed(true);
+  }, []);
+
+  const handleToggleRecording = useCallback(() => {
+    console.log("Toggling recording:", isRecording ? "stop" : "start");
     if (isRecording) {
       stopRecording();
     } else {
       startRecording();
     }
-  };
+  }, [isRecording, startRecording, stopRecording]);
 
-  const handleToggleWriterMode = () => {
+  const handleToggleWriterMode = useCallback(() => {
+    console.log("Toggling writer mode:", writerMode ? "disable" : "enable");
     if (!writerMode && isRecording) {
       stopRecording();
     }
     setWriterMode((prev) => !prev);
-  };
+  }, [writerMode, isRecording, stopRecording, setWriterMode]);
+
+  const handleToggleSpeaker = useCallback(() => {
+    console.log("Toggling speaker mute:", isSpeakerMuted ? "unmute" : "mute");
+    setIsSpeakerMuted((prev) => !prev);
+  }, [isSpeakerMuted, setIsSpeakerMuted]);
 
   return (
-    <div className={styles.chatOptionsContainer}>
-      {/* Collapsed Banner */}
+    <div 
+      className={styles.chatOptionsContainer}
+      data-debug={process.env.NODE_ENV === 'development'}
+      data-collapsed={isCollapsed}
+      data-writer-mode={writerMode}
+    >
       {isCollapsed ? (
         <div className={styles.collapsedBanner}>
           <IconButton
-            onClick={() => setIsCollapsed(false)}
+            onClick={handleExpandMenu}
             aria-label="Expand Menu"
           >
             <Icon glyph="ChevronDown" />
@@ -53,7 +74,7 @@ const ChatOptions = ({
           {/* Header */}
           <div className={styles.menuHeader}>
             <IconButton
-              onClick={() => setIsCollapsed(true)}
+              onClick={handleCollapseMenu}
               aria-label="Collapse Menu"
             >
               <Icon glyph="ChevronUp" />
@@ -77,7 +98,7 @@ const ChatOptions = ({
               <Toggle
                 size="xsmall"
                 checked={!isSpeakerMuted}
-                onChange={() => setIsSpeakerMuted((prev) => !prev)}
+                onChange={handleToggleSpeaker}
                 aria-label="Speaker Toggle"
               />
             </div>
@@ -92,35 +113,37 @@ const ChatOptions = ({
               />
             </div>
           </div>
-        </div>
-      )}
-      {/* Typing Input Field */}
-      {writerMode && (
-        <div className={styles.writerContainer}>
-          <TextInput
-            placeholder="Type your message..."
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && userInput.trim()) {
-                submitMessage(userInput);
-                setUserInput(""); // Clear input after sending
-              }
-            }}
-            aria-labelledby="Text input"
-            className={styles.textArea}
-            disabled={isTyping}
-          />
-          <Button
-            className={styles.sendButton}
-            disabled={isTyping || !userInput.trim()}
-            onClick={() => {
-              submitMessage(userInput);
-              setUserInput("");
-            }}
-          >
-            Send
-          </Button>
+
+          {writerMode && (
+            <div className={styles.writerContainer}>
+              <TextInput
+                placeholder="Type your message..."
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && userInput.trim()) {
+                    console.log("Submitting message via Enter:", userInput);
+                    submitMessage(userInput);
+                    setUserInput(""); 
+                  }
+                }}
+                aria-labelledby="Text input"
+                className={styles.textArea}
+                disabled={isTyping}
+              />
+              <Button
+                className={styles.sendButton}
+                disabled={isTyping || !userInput.trim()}
+                onClick={() => {
+                  console.log("Submitting message via button:", userInput);
+                  submitMessage(userInput);
+                  setUserInput("");
+                }}
+              >
+                Send
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

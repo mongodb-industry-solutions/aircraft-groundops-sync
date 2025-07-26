@@ -6,6 +6,7 @@ const useChatSimulate = ({
   setIsTyping,
   setSuggestedAnswer,
 }) => {
+  const MAX_MESSAGES = 100; // Temporarily increased from 30 to 100 to test if aggressive limiting is causing message loss
   const [messageIndex, setMessageIndex] = useState(0);
 
   const messages = [];
@@ -13,6 +14,11 @@ const useChatSimulate = ({
   const playAudioSimulate = useCallback((index) => {
     const audioFile = `/audios/${index}.wav`;
     const audio = new Audio(audioFile);
+    audio.addEventListener('ended', () => {
+      // Clean up audio element to free memory
+      audio.src = '';
+      audio.load();
+    });
     audio.play();
   }, []);
 
@@ -33,7 +39,10 @@ const useChatSimulate = ({
                 .slice(0, wordIndex + 1)
                 .join(" ");
             }
-            return updated;
+            // Limit message history during typing for memory optimization
+            return updated.length > MAX_MESSAGES 
+              ? updated.slice(-MAX_MESSAGES) 
+              : updated;
           });
 
           wordIndex += 1;
@@ -78,7 +87,13 @@ const useChatSimulate = ({
       if (newMessage.tool) {
         await handleToolSimulate(newMessage.tool);
       } else {
-        setMessagesToShow((prev) => [...prev, { ...newMessage, text: "" }]);
+        setMessagesToShow((prev) => {
+          const updatedMessages = [...prev, { ...newMessage, text: "" }];
+          // Limit message history for memory optimization
+          return updatedMessages.length > MAX_MESSAGES 
+            ? updatedMessages.slice(-MAX_MESSAGES) 
+            : updatedMessages;
+        });
         await typeMessageSimulate(newMessage, messageIndex);
       }
       setMessageIndex((prev) => prev + 1);

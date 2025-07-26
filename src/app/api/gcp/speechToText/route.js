@@ -1,5 +1,13 @@
 import { getSpeechRecognitionStream } from "@/lib/speech";
 
+// HTTP GET method for route validation
+export function GET() {
+  return new Response("WebSocket endpoint for speech recognition", { 
+    status: 200,
+    headers: { 'Content-Type': 'text/plain' }
+  });
+}
+
 export function SOCKET(client, request, server) {
   console.log("Client connected");
 

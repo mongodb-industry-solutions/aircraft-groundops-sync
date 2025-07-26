@@ -1,7 +1,7 @@
 // public/worklets/recorderWorkletProcessor.js
 
 class RecorderProcessor extends AudioWorkletProcessor {
-  bufferSize = 2048;
+  bufferSize = 256; // Aggressively reduced from 512 to 256 for extreme memory optimization
   _bytesWritten = 0;
   _buffer = new Float32Array(this.bufferSize);
 
@@ -47,6 +47,12 @@ class RecorderProcessor extends AudioWorkletProcessor {
     const result = this.downsampleBuffer(buffer, 44100, 16000); // Downsample to 16kHz
     this.port.postMessage(result);
     this.initBuffer();
+    // Clear the buffer reference to free memory and force garbage collection
+    this._buffer.fill(0);
+    // Zero out the temporary buffer as well
+    if (buffer !== this._buffer) {
+      buffer.fill(0);
+    }
   }
 
   downsampleBuffer(buffer, sampleRate, outSampleRate) {

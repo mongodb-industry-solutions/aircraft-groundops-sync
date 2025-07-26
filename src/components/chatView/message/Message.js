@@ -2,13 +2,13 @@ import React from "react";
 import { Body, Label } from "@leafygreen-ui/typography";
 import styles from "./message.module.css";
 
-const Message = ({ message, isRecording, isLastMessage }) => {
+const Message = ({ message, isRecording, isLastMessage, isFirstMessage }) => {
   const isUser = message.sender === "user";
   return (
     <div
       className={`${styles.messageContainer} ${
         isUser ? styles.user : styles.assistant
-      }`}
+      } ${isFirstMessage ? styles.firstMessage : ''}`}
     >
       <div className={styles.messageHeader}>
         {isUser && isLastMessage && (

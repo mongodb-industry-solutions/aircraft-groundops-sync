@@ -7,6 +7,8 @@ import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
 
+const MAX_MESSAGES = 100; // Temporarily increased from 30 to 100 to test if aggressive limiting is causing message loss
+
 const ChatView = ({
   setCurrentView,
   simulationMode,
@@ -24,7 +26,6 @@ const ChatView = ({
   const [isRecording, setIsRecording] = useState(false);
   const [writerMode, setWriterMode] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
-  const [isLoadingDataworkz, setIsLoadingDataworkz] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
 
   const {
@@ -88,57 +89,25 @@ const ChatView = ({
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesToShow, suggestedAnswer]);
 
-  // submitMessage to Dataworkz
+  // submitMessage for typing mode - use LLM chat to maintain conversation continuity
   const submitMessage = async (text) => {
+    // Add user message to conversation first
     setMessagesToShow((prev) => {
       const lastMessage = prev[prev.length - 1];
+      let updatedMessages;
       if (lastMessage?.sender === "user" && lastMessage?.text.trim() === "") {
-        return [...prev.slice(0, -1), { sender: "user", text }];
+        updatedMessages = [...prev.slice(0, -1), { sender: "user", text }];
+      } else {
+        updatedMessages = [...prev, { sender: "user", text }];
       }
-      return [...prev, { sender: "user", text }];
+      // Limit message history to prevent memory accumulation
+      return updatedMessages.length > MAX_MESSAGES 
+        ? updatedMessages.slice(-MAX_MESSAGES) 
+        : updatedMessages;
     });
 
-    // Send all messages to Dataworkz API
-    setIsTyping(true);
-    setIsLoadingDataworkz(true);
-    try {
-      const res = await fetch("/api/dataworkz/answer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionText: text }),
-      });
-
-      let answer = "No answer found.";
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        answer = errorData.error
-          ? `Error: ${errorData.error}${errorData.details ? ` (${errorData.details})` : ""}`
-          : "Unknown error occurred.";
-      } else {
-        const data = await res.json();
-        if (data.error) {
-          answer = `Error: ${data.error}${data.details ? ` (${data.details})` : ""}`;
-        } else {
-          answer = data.answer || data.result || data.response || "No answer found.";
-        }
-      }
-      setMessagesToShow((prev) => [
-        ...prev,
-        { sender: "assistant", text: answer, source: "dataworkz" },
-      ]);
-
-      if (!isSpeakerMuted) {
-        await handleTextToSpeech(answer);
-      }
-
-    } catch (e) {
-      setMessagesToShow((prev) => [
-        ...prev,
-        { sender: "assistant", text: "Network or server error. Please try again.", source: "dataworkz" },
-      ]);
-    }
-    setIsTyping(false);
-    setIsLoadingDataworkz(false);
+    // Use LLM chat instead of Dataworkz to maintain session continuity
+    await handleLLMResponse(text);
   };
 
   useEffect(() => {
@@ -173,6 +142,7 @@ const ChatView = ({
             message={msg}
             isRecording={isRecording}
             isLastMessage={index === messagesToShow.length - 1}
+            isFirstMessage={index === 0}
           />
         ))}
         <div ref={chatEndRef} />
@@ -187,7 +157,7 @@ const ChatView = ({
           isRecording={isRecording}
           startRecording={startRecording}
           stopRecording={stopRecording}
-          isTyping={isTyping || isLoadingDataworkz}
+          isTyping={isTyping}
           submitMessage={submitMessage}
         />
       ) : (
