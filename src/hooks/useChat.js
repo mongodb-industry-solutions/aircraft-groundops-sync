@@ -35,7 +35,7 @@ const useChat = ({
   const audioContextRef = useRef(null);
   const audioInputRef = useRef(null);
   const isPlayingTTSRef = useRef(false); 
-  const currentTTSMessageIndexRef = useRef(-1); // Track which message is currently playing TTS
+  const currentTTSMessageIndexRef = useRef(-1);
   const sessionId = useChatSession();
   const [greetingSent, setGreetingSent] = useState(false);
   const [checklistCompletionSent, setChecklistCompletionSent] = useState(false);
@@ -43,7 +43,6 @@ const useChat = ({
   // More aggressive memory cleanup function
   const forceMemoryCleanup = () => {
     try {
-      // Clear any hanging audio elements
       const audioElements = document.querySelectorAll('audio');
       audioElements.forEach(audio => {
         if (!audio.paused) {
@@ -54,20 +53,40 @@ const useChat = ({
         audio.remove();
       });
       
-      if (typeof window !== 'undefined' && window.URL) {
-      }
+      // Clear any video elements that might exist
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        if (!video.paused) {
+          video.pause();
+        }
+        video.src = '';
+        video.load();
+        video.remove();
+      });
+      
+      // Clear any canvas elements to free memory
+      const canvasElements = document.querySelectorAll('canvas');
+      canvasElements.forEach(canvas => {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+      
+      // Force garbage collection if available
       if (typeof window !== 'undefined' && window.gc) {
         window.gc();
       }
       
-      if (typeof window !== 'undefined' && window.performance && window.performance.memory && process.env.NODE_ENV === 'development') {
-        const memInfo = window.performance.memory;
-        console.log('Memory usage:', {
-          used: Math.round(memInfo.usedJSHeapSize / 1048576) + 'MB',
-          total: Math.round(memInfo.totalJSHeapSize / 1048576) + 'MB',
-          limit: Math.round(memInfo.jsHeapSizeLimit / 1048576) + 'MB'
-        });
-      }
+      // Production memory reporting (disabled for performance)
+      // if (typeof window !== 'undefined' && window.performance && window.performance.memory) {
+      //   const memInfo = window.performance.memory;
+      //   //console.log('Memory usage:', {
+      //     used: Math.round(memInfo.usedJSHeapSize / 1048576) + 'MB',
+      //     total: Math.round(memInfo.totalJSHeapSize / 1048576) + 'MB',
+      //     limit: Math.round(memInfo.jsHeapSizeLimit / 1048576) + 'MB'
+      //   });
+      // }
     } catch (error) {
         console.warn("Error during memory cleanup:", error);
       }
@@ -75,7 +94,7 @@ const useChat = ({
   
   const stopAllTTS = () => {
     if (isPlayingTTSRef.current) {
-      console.log("Stopping all TTS playback");
+      //console.log("Stopping all TTS playback");
       isPlayingTTSRef.current = false;
       currentTTSMessageIndexRef.current = -1; 
       const audioElements = document.querySelectorAll('audio');
@@ -96,7 +115,7 @@ const useChat = ({
 
   // Reduce frequency of memory cleanup to save CPU cycles and potential memory overhead
   useEffect(() => {
-    const cleanup = setInterval(forceMemoryCleanup, 40000); // every 40 seconds
+    const cleanup = setInterval(forceMemoryCleanup, 60000); // Increased to every 60 seconds for production
     return () => clearInterval(cleanup);
   }, []);
   const getStepNumber = (step, index) => {
@@ -118,11 +137,11 @@ const useChat = ({
     // Reset greeting state for new operation/session
     setGreetingSent(false);
     setChecklistCompletionSent(false);
-    console.log("Reset greeting and checklist completion state for new operation");
+    //console.log("Reset greeting and checklist completion state for new operation");
     
     // Cleanup function for memory management
     return () => {
-      console.log("Cleaning up useChat hook resources");
+      //console.log("Cleaning up useChat hook resources");
       try {
         if (socketRef.current) {
           socketRef.current.close();
@@ -262,14 +281,14 @@ const useChat = ({
             const isCompletionMessage = partialMessage.includes("Checklist complete!");
             
             if (isGreeting && greetingSent) {
-              console.log("Skipping repeated greeting:", partialMessage.slice(0, 50) + "...");
+              //console.log("Skipping repeated greeting:", partialMessage.slice(0, 50) + "...");
               partialMessage = null;
               setTimeout(forceMemoryCleanup, 100);
               return;
             }
             
             if (isCompletionMessage && !partialMessage.includes("Well done")) {
-              console.log("Skipping LLM checklist completion message (handled separately):", partialMessage.slice(0, 50) + "...");
+              //console.log("Skipping LLM checklist completion message (handled separately):", partialMessage.slice(0, 50) + "...");
               partialMessage = null;
               setTimeout(forceMemoryCleanup, 100);
               return;
@@ -277,7 +296,7 @@ const useChat = ({
             
             if (isGreeting) {
               setGreetingSent(true);
-              console.log("First greeting detected, marking as sent");
+              //console.log("First greeting detected, marking as sent");
             }
             
             await handleTextToSpeech(partialMessage, assistantMessageIndex);
@@ -332,12 +351,12 @@ const useChat = ({
           const isCompletionMessage = newContent.includes("Checklist complete!");
           
           if (isGreeting && greetingSent) {
-            console.log("Skipping repeated greeting in UI:", newContent.slice(0, 30) + "...");
+            //console.log("Skipping repeated greeting in UI:", newContent.slice(0, 30) + "...");
             return;
           }
           
           if (isCompletionMessage && !newContent.includes("Well done")) {
-            console.log("Skipping LLM checklist completion in UI (handled separately):", newContent.slice(0, 30) + "...");
+            //console.log("Skipping LLM checklist completion in UI (handled separately):", newContent.slice(0, 30) + "...");
             return;
           }
           
@@ -424,13 +443,6 @@ const useChat = ({
       switch (functionCall.name) {
         case "retrieveChecklist":
           try {
-            console.log("DEBUG: selectedOperation at retrieval time:", {
-              selectedOperation: selectedOperation,
-              type: typeof selectedOperation,
-              keys: selectedOperation ? Object.keys(selectedOperation) : 'null/undefined',
-              id: selectedOperation?.id,
-              title: selectedOperation?.title
-            });
             console.log('Processing fresh checklist retrieval for operation:', selectedOperation?.id);            
             const operationId = functionCall.args?.operationId || selectedOperation?.id;
             
@@ -445,7 +457,7 @@ const useChat = ({
             });
             
             if (!operationId) {
-              console.log("No operation ID available - selectedOperation:", selectedOperation);
+              //console.log("No operation ID available - selectedOperation:", selectedOperation);
               let errorResponse = "I need an operation to be selected first. Please go back and select an operation from the Outbound Operations menu, then return to start the checklist.";
               replyToFunctionCall(functionCall.name, errorResponse);
               addLog(sessionId, functionCall.name, "error", { 
@@ -457,7 +469,7 @@ const useChat = ({
               break;
             }
 
-            console.log('About to call checklist API with operationId:', operationId);
+            //console.log('About to call checklist API with operationId:', operationId);
             const response = await fetch("/api/checklist/get", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -475,7 +487,7 @@ const useChat = ({
             }
 
             const checklistData = await response.json();
-            console.log('Raw checklist API response:', JSON.stringify(checklistData, null, 2));
+            // //console.log('Raw checklist API response:', JSON.stringify(checklistData, null, 2));
             
             if (checklistData.error) {
               let errorResponse = "I couldn't find the checklist for this operation. Please make sure an operation is selected.";
@@ -485,19 +497,19 @@ const useChat = ({
               const firstChecklistItem = checklistData.checklist?.[0];
               let responseData;
               
-              console.log('First checklist item:', firstChecklistItem);
-              console.log('All checklist items:', checklistData.checklist);
-              console.log('Total checklist steps:', checklistData.checklist?.length || 0);
+              // //console.log('First checklist item:', firstChecklistItem);
+              // //console.log('All checklist items:', checklistData.checklist);
+              // //console.log('Total checklist steps:', checklistData.checklist?.length || 0);
               
               if (firstChecklistItem) {
                 const firstStepNumber = getStepNumber(firstChecklistItem, 0);
                 responseData = `Retrieved checklist for ${checklistData.operationTitle}. Start with Step ${firstStepNumber}: "${firstChecklistItem.step}"`;
-                console.log('First step details:', { stepNumber: firstStepNumber, stepText: firstChecklistItem.step });
+                // //console.log('First step details:', { stepNumber: firstStepNumber, stepText: firstChecklistItem.step });
               } else {
                 responseData = `Retrieved checklist for ${checklistData.operationTitle} but no main checklist items found.`;
               }
               
-              console.log('Sending response to assistant:', responseData);
+              // //console.log('Sending response to assistant:', responseData);
               
               replyToFunctionCall(functionCall.name, responseData);
               addLog(sessionId, functionCall.name, "response", { 
@@ -540,7 +552,7 @@ const useChat = ({
             });
 
             // Get the current checklist to find the next step
-            console.log('Getting next step after completing step:', stepNumber);
+            //console.log('Getting next step after completing step:', stepNumber);
             const operationId = selectedOperation?.id;
             
             if (operationId) {
@@ -560,7 +572,7 @@ const useChat = ({
                   const nextStepIndex = currentStepIndex !== -1 ? currentStepIndex + 1 : stepNumber;
                   const nextStep = checklistData.checklist?.[nextStepIndex];
                   
-                  console.log(`Current step ${stepNumber} found at index ${currentStepIndex}, looking for next step at index ${nextStepIndex}:`, nextStep);
+                  //console.log(`Current step ${stepNumber} found at index ${currentStepIndex}, looking for next step at index ${nextStepIndex}:`, nextStep);
                   console.log('All available checklist steps:', checklistData.checklist?.map((step, idx) => ({
                     index: idx,
                     stepNumber: getStepNumber(step, idx),
@@ -580,7 +592,7 @@ const useChat = ({
                     }
                   }
                   
-                  console.log('Sending markStepCompleted response with next step:', responseData);
+                  //console.log('Sending markStepCompleted response with next step:', responseData);
                   
                   if (onStepCompleted) {
                     onStepCompleted(stepNumber, stepText);
@@ -631,7 +643,7 @@ const useChat = ({
         case "queryDataworkz":
           try {
             const { query } = functionCall.args;
-            console.log("Querying Dataworkz with:", query);
+            //console.log("Querying Dataworkz with:", query);
             
             const response = await fetch("/api/dataworkz/answer", {
               method: "POST",
@@ -639,9 +651,9 @@ const useChat = ({
               body: JSON.stringify({ questionText: query }),
             });
 
-            console.log("Dataworkz API response status:", response.status);
+            //console.log("Dataworkz API response status:", response.status);
             const dataworkzResponse = await response.json();
-            console.log("Dataworkz API response data:", dataworkzResponse);
+            //console.log("Dataworkz API response data:", dataworkzResponse);
             
             if (response.ok && !dataworkzResponse.error) {
               let responseData = dataworkzResponse.answer || dataworkzResponse.result || dataworkzResponse.response || "No answer found in the knowledge base.";
@@ -682,7 +694,7 @@ const useChat = ({
         case "switchToManualMode":
           try {
             const { reason } = functionCall.args;
-            console.log(`Switching to manual mode: ${reason}`);
+            //console.log(`Switching to manual mode: ${reason}`);
             stopAllTTS();            
             if (isRecording) {
               stopRecording();
@@ -755,7 +767,7 @@ const useChat = ({
     });
 
     try {
-      console.log("Sending function result as text message:", { name, content, messageToSend });
+      //console.log("Sending function result as text message:", { name, content, messageToSend });
       
       const response = await fetch("/api/gcp/chat", {
         method: "POST",
@@ -808,18 +820,18 @@ const useChat = ({
               const isCompletionMessage = partialMessage.includes("Checklist complete!");
               
               if (isGreeting && greetingSent) {
-                //console.log("Skipping repeated greeting in function response:", partialMessage);
+                ////console.log("Skipping repeated greeting in function response:", partialMessage);
                 return;
               }
               
               if (isCompletionMessage && !partialMessage.includes("Well done")) {
-                //console.log("Skipping LLM checklist completion in function response (handled separately):", partialMessage);
+                ////console.log("Skipping LLM checklist completion in function response (handled separately):", partialMessage);
                 return;
               }
               
               if (isGreeting) {
                 setGreetingSent(true);
-                console.log("First greeting detected in function response, marking as sent");
+                //console.log("First greeting detected in function response, marking as sent");
               }
               
               await handleTextToSpeech(partialMessage);
@@ -834,16 +846,16 @@ const useChat = ({
           const isCompletionMessage = partialMessage.includes("Checklist complete!");
           
           if (isGreeting && greetingSent) {
-            console.log("Skipping repeated greeting in function response UI:", partialMessage);
+            //console.log("Skipping repeated greeting in function response UI:", partialMessage);
             return;
           }
           
           if (isCompletionMessage && !partialMessage.includes("Well done")) {
-            console.log("Skipping LLM checklist completion in function response UI (handled separately):", partialMessage);
+            //console.log("Skipping LLM checklist completion in function response UI (handled separately):", partialMessage);
             return;
           }
           if (isCompletionMessage && !partialMessage.includes("Well done")) {
-            console.log("Skipping LLM checklist completion in function response UI (handled separately):", partialMessage);
+            //console.log("Skipping LLM checklist completion in function response UI (handled separately):", partialMessage);
             return;
           }
 
@@ -887,64 +899,42 @@ const useChat = ({
       `${protocol}://${host}/api/gcp/speechToText`
     );
     socketRef.current.onopen = () => {
-      console.log("WebSocket connection established");
+      //console.log("WebSocket connection established");
     };
 
     socketRef.current.onclose = () => {
-      console.log("WebSocket connection closed");
+      //console.log("WebSocket connection closed");
     };
 
     socketRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
       
       if (data.final && data.text.trim() !== "") {
-        console.log("Speech recognized:", data.text);
+        //console.log("Speech recognized:", data.text);
         
-        // Improved echo detection and filtering
+        // Simplified echo detection for production memory optimization
         setMessagesToShow((prev) => {
           const recentAssistantMessages = prev
             .filter(msg => msg.sender === "assistant" && msg.text)
-            .slice(-3)
+            .slice(-2) // Reduced from -3 to -2 for memory
             .map(msg => msg.text.toLowerCase().trim());
           
           const userText = data.text.toLowerCase().trim();
+          
+          // Simplified echo detection
           const isLikelyEcho = recentAssistantMessages.some(assistantText => {
-            if (assistantText === userText) {
-              return true;
-            }
-            
-            if (userText.length > 8 && assistantText.includes(userText)) {
-              return true;
-            }
-            
-            if (assistantText.length > 8 && userText.includes(assistantText)) {
-              return true;
-            }
-            
-            // Check for similar words
-            const assistantWords = assistantText.split(' ');
-            const userWords = userText.split(' ');
-            if (userWords.length > 1 && assistantWords.length > 1) {
-              const matchingWords = userWords.filter(word => 
-                word.length > 3 && assistantWords.some(aWord => 
-                  aWord.includes(word) || word.includes(aWord)
-                )
-              );
-              if (matchingWords.length > userWords.length * 0.7) {
-                return true;
-              }
-            }
-            
-            return false;
+            return assistantText === userText || 
+                   (userText.length > 8 && assistantText.includes(userText)) ||
+                   (assistantText.length > 8 && userText.includes(assistantText));
           });
           
           if (userText.length < 2 || /^[^\w]*$/.test(userText)) {
-            console.log("Filtering out noise/short input:", userText);
+            //console.log("Filtering out noise/short input:", userText);
             return prev;
           }
           
           if (isLikelyEcho) {
-            console.log("Filtering out likely TTS echo:", userText);
+            //console.log("Filtering out likely TTS echo:", userText);
             return prev; 
           }
           
@@ -960,7 +950,7 @@ const useChat = ({
         setMessagesToShow((prev) => {
           const lastMessage = prev[prev.length - 1];
           if (lastMessage?.sender === "user" && lastMessage?.text === data.text) {
-            console.log("Processing user speech input:", data.text);
+            //console.log("Processing user speech input:", data.text);
             stopRecording();
             
             // Clean up the text before sending to LLM
@@ -971,7 +961,7 @@ const useChat = ({
             if (cleanedText.length >= 2 && /[a-zA-Z]/.test(cleanedText)) {
               handleLLMResponse(cleanedText);
             } else {
-              console.log("Input too short or invalid, ignoring:", cleanedText);
+              //console.log("Input too short or invalid, ignoring:", cleanedText);
             }
           }
           return prev;
@@ -1067,7 +1057,6 @@ const useChat = ({
     
     // Aggressive memory cleanup
     if (typeof window !== 'undefined') {
-      // Force garbage collection if available
       if (window.gc) {
         setTimeout(() => window.gc(), 100);
       }
@@ -1096,25 +1085,25 @@ const useChat = ({
         
         // Prevent duplicate completion messages in TTS
         if (isCompletionMessage && !text.includes("Well done")) {
-          console.log("Skipping LLM checklist completion TTS (handled separately):", text.slice(0, 50) + "...");
+          //console.log("Skipping LLM checklist completion TTS (handled separately):", text.slice(0, 50) + "...");
           resolve();
           return;
         }
         
         // Check if manual mode is enabled (but allow the manual mode announcement itself)
         if (isManualMode && !isManualModeMessage && !isCompletionMessage) {
-          console.log("Skipping TTS - manual mode enabled, text:", text.slice(0, 50) + "...");
+          //console.log("Skipping TTS - manual mode enabled, text:", text.slice(0, 50) + "...");
           resolve();
           return;
         }
         
         if (isManualModeMessage) {
-          console.log("Speaking manual mode announcement, then stopping all TTS");
+          //console.log("Speaking manual mode announcement, then stopping all TTS");
         }
         
         // Enhanced TTS interrupt logic: Only proceed if this is the latest message
         if (messageIndex !== -1 && messageIndex < currentTTSMessageIndexRef.current) {
-          console.log(`Skipping TTS for outdated message #${messageIndex}, current is #${currentTTSMessageIndexRef.current}`);
+          //console.log(`Skipping TTS for outdated message #${messageIndex}, current is #${currentTTSMessageIndexRef.current}`);
           resolve();
           return;
         }
@@ -1123,10 +1112,7 @@ const useChat = ({
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
           stopRecording();
         }
-        
-        // Stop any existing TTS before starting new one
         stopAllTTS();
-        
         isPlayingTTSRef.current = true;
         currentTTSMessageIndexRef.current = messageIndex; 
         
@@ -1143,7 +1129,7 @@ const useChat = ({
 
           // Double-check if we should still proceed (another message might have started)
           if (messageIndex !== -1 && messageIndex < currentTTSMessageIndexRef.current) {
-            console.log(`Aborting TTS for message #${messageIndex}, newer message #${currentTTSMessageIndexRef.current} is active`);
+            //console.log(`Aborting TTS for message #${messageIndex}, newer message #${currentTTSMessageIndexRef.current} is active`);
             isPlayingTTSRef.current = false;
             audio.src = '';
             audio.load();
@@ -1153,7 +1139,7 @@ const useChat = ({
 
           // event listeners to track playback state and resolve promise
           audio.addEventListener('ended', () => {
-            console.log("TTS playback ended");
+            //console.log("TTS playback ended");
             isPlayingTTSRef.current = false;
             currentTTSMessageIndexRef.current = -1;
             // Clean up audio element to free memory
@@ -1161,12 +1147,12 @@ const useChat = ({
             audio.load();
             audio.remove();
             // Force memory cleanup after TTS
-            setTimeout(forceMemoryCleanup, 50);
+            setTimeout(forceMemoryCleanup, 100); // Increased delay for production
             resolve();
           });
 
           audio.addEventListener('error', (error) => {
-            console.log("TTS playback error:", error);
+            //console.log("TTS playback error:", error);
             isPlayingTTSRef.current = false;
             currentTTSMessageIndexRef.current = -1;
             // Clean up audio element to free memory
@@ -1174,7 +1160,7 @@ const useChat = ({
             audio.load();
             audio.remove();
             // Force memory cleanup after TTS error
-            setTimeout(forceMemoryCleanup, 50);
+            setTimeout(forceMemoryCleanup, 100); // Increased delay for production
             reject(error);
           });
 
@@ -1182,7 +1168,7 @@ const useChat = ({
 
           if (playPromise !== undefined) {
             await playPromise.catch((error) => {
-              console.log("Audio playback required user interaction first:", error);
+              //console.log("Audio playback required user interaction first:", error);
               isPlayingTTSRef.current = false;
               currentTTSMessageIndexRef.current = -1;
               reject(error);
@@ -1206,9 +1192,9 @@ const useChat = ({
   useEffect(() => {
     if (onManualStepCompleted) {
       const handleManualCompletion = (stepNumber, stepText) => {
-        console.log(`Manual step completion received: Step ${stepNumber} - ${stepText}`);
+        //console.log(`Manual step completion received: Step ${stepNumber} - ${stepText}`);
         if (!isManualMode) {
-          console.log("Switching to manual mode");          
+          //console.log("Switching to manual mode");          
           setIsManualMode(true);
           
           // Stop all TTS when switching to manual mode
@@ -1234,7 +1220,7 @@ const useChat = ({
             }, 500);
           }
         } else {
-          console.log("Already in manual mode, ignoring subsequent manual completions");
+          //console.log("Already in manual mode, ignoring subsequent manual completions");
         }
       };
       
@@ -1245,11 +1231,11 @@ const useChat = ({
   useEffect(() => {
     if (onChecklistCompleted) {
       const handleChecklistCompletion = (operationTitle) => {
-        console.log(`Checklist completed for: ${operationTitle}`);
+        //console.log(`Checklist completed for: ${operationTitle}`);
         
         // Set completion flag immediately to prevent duplicates
         if (checklistCompletionSent) {
-          console.log("Checklist completion already handled, skipping duplicate");
+          //console.log("Checklist completion already handled, skipping duplicate");
           return;
         }
         setChecklistCompletionSent(true);
@@ -1272,7 +1258,7 @@ const useChat = ({
             try {
               await handleTextToSpeech(congratsMessage);
               if (!isRecording && !isManualMode) {
-                console.log("Restarting recording after checklist completion TTS finished");
+                //console.log("Restarting recording after checklist completion TTS finished");
                 startRecording();
               }
             } catch (error) {
@@ -1284,7 +1270,7 @@ const useChat = ({
           }, 500);
         } else {
           if (!isRecording && !isManualMode) {
-            console.log("Starting recording for user response after checklist completion (muted)");
+            //console.log("Starting recording for user response after checklist completion (muted)");
             setTimeout(() => {
               startRecording();
             }, 500);

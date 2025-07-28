@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Message from "./message/Message";
 import SuggestedAnswer from "./suggestedAnswer/SuggestedAnswer";
 import styles from "./chatView.module.css";
-import useChatSimulate from "@/hooks/useChatSimulate";
 import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
@@ -11,7 +10,6 @@ const MAX_MESSAGES = 15;
 
 const ChatView = ({
   setCurrentView,
-  simulationMode,
   selectedDevice,
   selectedOperation,
   onStepCompleted,
@@ -27,17 +25,6 @@ const ChatView = ({
   const [writerMode, setWriterMode] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
-
-  const {
-    handleNextMessageSimulate,
-    typeMessageSimulate,
-    startConversationSimulation,
-  } = useChatSimulate({
-    setCurrentView,
-    setMessagesToShow,
-    setIsTyping,
-    setSuggestedAnswer,
-  });
 
   const { handleLLMResponse, startRecording, stopRecording, stopAllTTS, isPlayingTTS, handleTextToSpeech } = useChat({
     setCurrentView,
@@ -56,31 +43,27 @@ const ChatView = ({
   });
 
   useEffect(() => {
-    if (simulationMode) {
-      startConversationSimulation();
-    } else {
-      if (messagesToShow.length === 0) {
-        setMessagesToShow([DEFAULT_GREETINGS]);
-        setIsTyping(false);
-        setTimeout(() => {
-          if (!isSpeakerMuted) {
-            handleTextToSpeech(DEFAULT_GREETINGS.text);
-          }
-        }, 500);
-      }
+    if (messagesToShow.length === 0) {
+      setMessagesToShow([DEFAULT_GREETINGS]);
+      setIsTyping(false);
+      setTimeout(() => {
+        if (!isSpeakerMuted) {
+          handleTextToSpeech(DEFAULT_GREETINGS.text);
+        }
+      }, 500);
     }
-  }, [simulationMode, selectedOperation, messagesToShow.length, isSpeakerMuted, handleTextToSpeech]);
+  }, [selectedOperation, messagesToShow.length, isSpeakerMuted, handleTextToSpeech]);
 
   useEffect(() => {
-    if (checklistCompleted && !simulationMode && messagesToShow.length > 0 && !isRecording) {
-      console.log("Auto-starting recording after checklist completion");
+    if (checklistCompleted && messagesToShow.length > 0 && !isRecording) {
+      //console.log("Auto-starting recording after checklist completion");
       setTimeout(() => {
         if (!isRecording && !isPlayingTTS) {
           startRecording();
         }
       }, 1500);
     }
-  }, [checklistCompleted, simulationMode, messagesToShow.length, isRecording, isPlayingTTS, startRecording]);
+  }, [checklistCompleted, messagesToShow.length, isRecording, isPlayingTTS, startRecording]);
 
   useEffect(() => {
   }, [selectedOperation]);
@@ -113,13 +96,11 @@ const ChatView = ({
       }
       return updatedMessages;
     });
-
-    // Use LLM chat instead of Dataworkz to maintain session continuity
     await handleLLMResponse(text);
   };
 
   useEffect(() => {
-    if (!simulationMode && !isTyping && !isRecording && !writerMode && !isManualMode && messagesToShow.length > 0) {
+    if (!isTyping && !isRecording && !writerMode && !isManualMode && messagesToShow.length > 0) {
       
       const checkTTSAndStartRecording = () => {
         const isTTSPlaying = isPlayingTTS ? isPlayingTTS() : false;
@@ -128,7 +109,7 @@ const ChatView = ({
           setTimeout(checkTTSAndStartRecording, 500);
         } else {
           setTimeout(() => {
-            if (!simulationMode && !isTyping && !isRecording && !writerMode && !isManualMode) {
+            if (!isTyping && !isRecording && !writerMode && !isManualMode) {
               startRecording();
             }
           }, 500); // half second delay after text to speech ends 
@@ -139,7 +120,7 @@ const ChatView = ({
       
       return () => clearTimeout(timer);
     }
-  }, [isTyping, simulationMode, isRecording, writerMode, isManualMode, messagesToShow.length, isPlayingTTS, startRecording]);
+  }, [isTyping, isRecording, writerMode, isManualMode, messagesToShow.length, isPlayingTTS, startRecording]);
 
   return (
     <div className={styles.chatViewContainer}>
@@ -156,28 +137,17 @@ const ChatView = ({
         <div ref={chatEndRef} />
       </div>
 
-      {!simulationMode ? (
-        <ChatOptions
-          isSpeakerMuted={isSpeakerMuted}
-          setIsSpeakerMuted={setIsSpeakerMuted}
-          writerMode={writerMode}
-          setWriterMode={setWriterMode}
-          isRecording={isRecording}
-          startRecording={startRecording}
-          stopRecording={stopRecording}
-          isTyping={isTyping}
-          submitMessage={submitMessage}
-        />
-      ) : (
-        <SuggestedAnswer
-          suggestedAnswer={suggestedAnswer}
-          isTyping={isTyping}
-          onSuggestionClick={() => {
-            setSuggestedAnswer(null);
-            handleNextMessageSimulate();
-          }}
-        />
-      )}
+      <ChatOptions
+        isSpeakerMuted={isSpeakerMuted}
+        setIsSpeakerMuted={setIsSpeakerMuted}
+        writerMode={writerMode}
+        setWriterMode={setWriterMode}
+        isRecording={isRecording}
+        startRecording={startRecording}
+        stopRecording={stopRecording}
+        isTyping={isTyping}
+        submitMessage={submitMessage}
+      />
     </div>
   );
 };

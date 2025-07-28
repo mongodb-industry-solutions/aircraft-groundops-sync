@@ -54,12 +54,12 @@ export async function POST(request) {
       responseInterval: operationData.response_interval || 5,
       secondMessage: operationData.second_message || "Do you need more time to complete this step?"
     };
-    console.log(`Returning checklist for ${operationId}:`, {
-      operationTitle: response.operationTitle,
-      priorCount: response.prior.length,
-      checklistCount: response.checklist.length,
-      firstChecklistItem: response.checklist[0]?.step || 'No checklist items found'
-    });
+    // //console.log(`Returning checklist for ${operationId}:`, {
+    //   operationTitle: response.operationTitle,
+    //   priorCount: response.prior.length,
+    //   checklistCount: response.checklist.length,
+    //   firstChecklistItem: response.checklist[0]?.step || 'No checklist items found'
+    // });
 
     return NextResponse.json(response);
 

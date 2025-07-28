@@ -5,8 +5,8 @@ import { clientPromise } from "@/lib/mongodb";
 export async function POST(req) {
   try {
     const { sessionId, message } = await req.json();
-    console.log("Received sessionId:", sessionId);
-    console.log("Received message:", message);
+    //console.log("Received sessionId:", sessionId);
+    //console.log("Received message:", message);
 
     if (!sessionId) {
       return NextResponse.json(
@@ -44,7 +44,7 @@ export async function POST(req) {
           );
         }
         messageToSend = message;
-        console.log("Validated function response:", JSON.stringify(messageToSend, null, 2));
+        //console.log("Validated function response:", JSON.stringify(messageToSend, null, 2));
       } else {
         console.error("Invalid function response format:", message);
         return NextResponse.json(
@@ -59,15 +59,15 @@ export async function POST(req) {
       );
     }
 
-    console.log("Message to send to VertexAI:", JSON.stringify(messageToSend, null, 2));
+    //console.log("Message to send to VertexAI:", JSON.stringify(messageToSend, null, 2));
 
     const chat = startChatSession(sessionId);
-    console.log("chat session started:", chat);
+    //console.log("chat session started:", chat);
 
     let result;
     try {
       result = await chat.sendMessageStream(messageToSend);
-      console.log("Received result from chat:", result);
+      //console.log("Received result from chat:", result);
     } catch (vertexError) {
       console.error("VertexAI sendMessageStream error:", vertexError);
       return NextResponse.json(
@@ -123,7 +123,7 @@ export async function POST(req) {
       },
     });
   } catch (error) {
-    console.log("API error:", error);
+    //console.log("API error:", error);
     console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

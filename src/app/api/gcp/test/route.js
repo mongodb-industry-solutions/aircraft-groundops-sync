@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    console.log("GET request received for chat session");
+    //console.log("GET request received for chat session");
     return NextResponse.json(
       { message: "API is reachable!" },
       { status: 200 }

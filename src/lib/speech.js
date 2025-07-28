@@ -67,10 +67,10 @@ export const getSpeechRecognitionStream = (client) => {
       }
     })
     .on("end", () => {
-      console.log("Speech recognition stream ended naturally");
+      //console.log("Speech recognition stream ended naturally");
     })
     .on("close", () => {
-      console.log("Speech recognition stream closed");
+      //console.log("Speech recognition stream closed");
     });
 
   return recognizeStream;

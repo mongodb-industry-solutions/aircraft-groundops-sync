@@ -22,17 +22,17 @@ const ChatOptions = ({
   const [userInput, setUserInput] = useState("");
 
   const handleExpandMenu = useCallback(() => {
-    console.log("Expanding chat options menu");
+    //console.log("Expanding chat options menu");
     setIsCollapsed(false);
   }, []);
 
   const handleCollapseMenu = useCallback(() => {
-    console.log("Collapsing chat options menu");
+    //console.log("Collapsing chat options menu");
     setIsCollapsed(true);
   }, []);
 
   const handleToggleRecording = useCallback(() => {
-    console.log("Toggling recording:", isRecording ? "stop" : "start");
+    //console.log("Toggling recording:", isRecording ? "stop" : "start");
     if (isRecording) {
       stopRecording();
     } else {
@@ -41,7 +41,7 @@ const ChatOptions = ({
   }, [isRecording, startRecording, stopRecording]);
 
   const handleToggleWriterMode = useCallback(() => {
-    console.log("Toggling writer mode:", writerMode ? "disable" : "enable");
+    //console.log("Toggling writer mode:", writerMode ? "disable" : "enable");
     if (!writerMode && isRecording) {
       stopRecording();
     }
@@ -49,14 +49,14 @@ const ChatOptions = ({
   }, [writerMode, isRecording, stopRecording, setWriterMode]);
 
   const handleToggleSpeaker = useCallback(() => {
-    console.log("Toggling speaker mute:", isSpeakerMuted ? "unmute" : "mute");
+    //console.log("Toggling speaker mute:", isSpeakerMuted ? "unmute" : "mute");
     setIsSpeakerMuted((prev) => !prev);
   }, [isSpeakerMuted, setIsSpeakerMuted]);
 
   return (
     <div 
       className={styles.chatOptionsContainer}
-      data-debug={process.env.NODE_ENV === 'development'}
+      data-debug={false}
       data-collapsed={isCollapsed}
       data-writer-mode={writerMode}
     >
@@ -122,7 +122,7 @@ const ChatOptions = ({
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && userInput.trim()) {
-                    console.log("Submitting message via Enter:", userInput);
+                    //console.log("Submitting message via Enter:", userInput);
                     submitMessage(userInput);
                     setUserInput(""); 
                   }
@@ -135,7 +135,7 @@ const ChatOptions = ({
                 className={styles.sendButton}
                 disabled={isTyping || !userInput.trim()}
                 onClick={() => {
-                  console.log("Submitting message via button:", userInput);
+                  //console.log("Submitting message via button:", userInput);
                   submitMessage(userInput);
                   setUserInput("");
                 }}

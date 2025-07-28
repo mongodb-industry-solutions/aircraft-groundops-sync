@@ -9,7 +9,7 @@ export function GET() {
 }
 
 export function SOCKET(client, request, server) {
-  console.log("Client connected");
+  //console.log("Client connected");
 
   let recognizeStream = null;
   let isStreamActive = false;
@@ -27,7 +27,7 @@ export function SOCKET(client, request, server) {
         });
         
         recognizeStream.on('end', () => {
-          console.log("Recognition stream ended");
+          //console.log("Recognition stream ended");
           isStreamActive = false;
           recognizeStream = null;
         });
@@ -55,7 +55,7 @@ export function SOCKET(client, request, server) {
 
   // Close the recognition stream when the WebSocket is done
   client.on("close", () => {
-    console.log("Client disconnected");
+    //console.log("Client disconnected");
     if (recognizeStream && isStreamActive) {
       try {
         recognizeStream.end();

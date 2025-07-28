@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import { useState } from "react";
 import InfoWizard from "@/components/InfoWizard/InfoWizard";
-import LogConsole from "@/components/logConsole/LogConsole";
+//import LogConsole from "@/components/logConsole/LogConsole";
 import OutboundOps from "@/components/OutboundOps/OutboundOps";
 import Checklist from "@/components/Checklist/checklist";
 import '../fonts.css'
@@ -29,7 +29,7 @@ export default function Home() {
   };
 
   const handleChecklistCompleted = (operationTitle) => {
-    console.log(`Manual checklist completed for: ${operationTitle}`);
+    //console.log(`Manual checklist completed for: ${operationTitle}`);
     setChecklistCompleted(true);
   };
 
@@ -56,7 +56,7 @@ export default function Home() {
               setChecklistCompleted(false);
             }}
             onManualStepCompleted={(stepNumber, stepText) => {
-              console.log(`Manual step completed: ${stepNumber} - ${stepText}`);
+              //console.log(`Manual step completed: ${stepNumber} - ${stepText}`);
             }}
             onChecklistCompleted={handleChecklistCompleted}
           />
@@ -81,7 +81,7 @@ export default function Home() {
             </div>
           )}
 
-          <LogConsole simulationMode={false} />
+          {/* <LogConsole simulationMode={false} /> */}
         </div>
       )}
     </>

@@ -305,7 +305,7 @@ const cleanupOldSessions = () => {
     if (now - sessionTimestamps[sessionId] > SESSION_TIMEOUT) {
       delete chatSessions[sessionId];
       delete sessionTimestamps[sessionId];
-      console.log(`Auto-cleaned expired session: ${sessionId}`);
+      //console.log(`Auto-cleaned expired session: ${sessionId}`);
     }
   });
 };
@@ -317,12 +317,12 @@ export const clearChatSession = (sessionId) => {
   if (chatSessions[sessionId]) {
     delete chatSessions[sessionId];
     delete sessionTimestamps[sessionId];
-    console.log(`Cleared chat session: ${sessionId}`);
+    //console.log(`Cleared chat session: ${sessionId}`);
   }
 };
 
 export const clearAllChatSessions = () => {
   chatSessions = {};
   Object.keys(sessionTimestamps).forEach(key => delete sessionTimestamps[key]);
-  console.log('Cleared all chat sessions');
+  //console.log('Cleared all chat sessions');
 };

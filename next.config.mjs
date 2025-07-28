@@ -39,20 +39,15 @@ const nextConfig = {
                         },
                     },
                 },
-                // Enable module concatenation for smaller bundles
                 concatenateModules: true,
-                // Enable tree shaking
                 usedExports: true,
-                // Minimize memory usage during build
                 minimize: true,
             };
             
-            // Reduce memory pressure during compilation
             config.resolve.symlinks = false;
             config.resolve.cacheWithContext = false;
         }
 
-        // For Web Workers, ensure proper file handling
         if (!isServer) {
             config.module.rules.push({
                 test: /\.wasm$/,

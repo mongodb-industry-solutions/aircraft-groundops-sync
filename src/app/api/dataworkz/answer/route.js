@@ -29,7 +29,7 @@ export async function POST(request) {
             questionText
         )}&llmProviderId=${encodeURIComponent(llmProviderId)}`;
 
-        console.log("Calling Dataworkz API:", { url: url.replace(apiKey, '[REDACTED]'), questionText });
+        //console.log("Calling Dataworkz API:", { url: url.replace(apiKey, '[REDACTED]'), questionText });
 
         const response = await fetch(url, {
             method: "GET",
@@ -49,7 +49,7 @@ export async function POST(request) {
         }
 
         const data = await response.json();
-        console.log("Dataworkz response:", data);
+        // //console.log("Dataworkz response:", data);
         return NextResponse.json(data, { status: 200 });
 
     } catch (error) {

@@ -26,7 +26,7 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
       setAssistantCompletedItems(new Set());
       
       try {
-        console.log('Fetching checklist for operation:', selectedOperation.id);
+        //console.log('Fetching checklist for operation:', selectedOperation.id);
         const response = await fetch('/api/checklist/get', {
           method: 'POST',
           headers: {
@@ -41,7 +41,7 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
           throw new Error(`API endpoint returned ${response.status}: ${errorText}`);
         } else {
           const data = await response.json();
-          console.log('Fetched checklist data:', data);
+          //console.log('Fetched checklist data:', data);
           setChecklistData(data);
         }
       } catch (err) {
@@ -61,7 +61,7 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
     
     const stats = getCompletionStats();
     if (stats.percentage === 100 && stats.total > 0) {
-      console.log('Checklist completed! Notifying...');
+      //console.log('Checklist completed! Notifying...');
       if (onChecklistCompleted) {
         onChecklistCompleted(checklistData.operationTitle);
       }
@@ -100,7 +100,7 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
           );
           
           if (stepItem) {
-            console.log(`Manual completion detected for step ${stepNumber}: ${stepItem.step}`);
+            //console.log(`Manual completion detected for step ${stepNumber}: ${stepItem.step}`);
             
             if (onManualStepCompleted) {
               onManualStepCompleted(stepNumber, stepItem.step);
@@ -131,7 +131,7 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
         : checklistData.checklist.indexOf(checklistItem);
       const itemId = `main_${orderKey}`;
       
-      console.log(`Assistant completing step ${stepNumber} (itemId: ${itemId})`);
+      //console.log(`Assistant completing step ${stepNumber} (itemId: ${itemId})`);
       
       setAssistantCompletedItems(prev => new Set(prev).add(itemId));
       
@@ -367,7 +367,6 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
             <div className={styles.assistantContent}>
               <ChatView
                 setCurrentView={() => {}}
-                simulationMode={false}
                 selectedDevice={null}
                 selectedOperation={selectedOperation}
                 onStepCompleted={handleStepCompleted}

@@ -9,7 +9,7 @@ let clientPromise;
 if (!global._mongoClientPromise) {
   client = new MongoClient(uri);
   clientPromise = client.connect().then(() => {
-    console.log(`Connected to MongoDB at ${uri}`);
+    //console.log(`Connected to MongoDB at ${uri}`);
     return client.db(dbName);
   }).catch(err => {
     console.error(`Failed to connect to MongoDB: ${err.message}`);

@@ -6,8 +6,6 @@ import AudioConfigMenu from "./audioConfigMenu/AudioConfigMenu";
 import styles from "./optionsView.module.css";
 
 const OptionsView = ({
-  simulationMode,
-  setSimulationMode,
   setCurrentView,
   setSelectedDevice,
 }) => {
@@ -17,14 +15,8 @@ const OptionsView = ({
     setIsAudioConfigOpen(true);
   };
 
-  const handleSimulationnMode = () => {
-    setSimulationMode(true);
-    setCurrentView("navigation");
-  };
-
   const handleDeviceConfirm = (deviceId) => {
     setSelectedDevice(deviceId);
-    setSimulationMode(false);
     setCurrentView("navigation");
   };
 
@@ -34,17 +26,9 @@ const OptionsView = ({
       <div className={styles.buttonContainer}>
         <Button
           className={styles.button}
-          disabled={simulationMode}
-          onClick={handleSimulationnMode}
-        >
-          Simulation Mode
-        </Button>
-        <Button
-          className={styles.button}
-          disabled={!simulationMode}
           onClick={handleExecutionMode}
         >
-          Execution Mode
+          Configure Audio & Start
         </Button>
       </div>
 
