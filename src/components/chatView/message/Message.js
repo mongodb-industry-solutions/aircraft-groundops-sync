@@ -4,6 +4,8 @@ import styles from "./message.module.css";
 
 const Message = ({ message, isRecording, isLastMessage, isFirstMessage }) => {
   const isUser = message.sender === "user";
+  const isTyping = message.typing;
+  
   return (
     <div
       className={`${styles.messageContainer} ${
@@ -27,7 +29,15 @@ const Message = ({ message, isRecording, isLastMessage, isFirstMessage }) => {
         baseFontSize={16}
         weight={"medium"}
       >
-        {message.text}
+        {isTyping ? (
+          <span className={styles.typingIndicator}>
+            <span className={styles.dot}></span>
+            <span className={styles.dot}></span>
+            <span className={styles.dot}></span>
+          </span>
+        ) : (
+          message.text
+        )}
       </Body>
     </div>
   );

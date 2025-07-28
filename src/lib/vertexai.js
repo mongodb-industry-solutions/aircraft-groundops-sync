@@ -284,7 +284,7 @@ const generativeModel = vertexAIClient.getGenerativeModel({
 // Memory management: Track session creation times and periodically clean up old sessions
 let chatSessions = {};
 const sessionTimestamps = {};
-const SESSION_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes instead of 10 for more aggressive cleanup
 
 export const startChatSession = (sessionId) => {
   if (!chatSessions[sessionId]) {
@@ -310,8 +310,8 @@ const cleanupOldSessions = () => {
   });
 };
 
-// Run cleanup every 5 minutes
-setInterval(cleanupOldSessions, 5 * 60 * 1000);
+// Run cleanup every 3 minutes instead of 5 for more frequent cleanup
+setInterval(cleanupOldSessions, 3 * 60 * 1000);
 
 export const clearChatSession = (sessionId) => {
   if (chatSessions[sessionId]) {

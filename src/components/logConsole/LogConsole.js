@@ -39,11 +39,12 @@ const LogConsole = ({ simulationMode }) => {
     return () => clearInterval(interval);
   }, [sessionId, simulationMode]);
 
+  // Optimize scroll behavior - only scroll on new logs, not on every render
   useEffect(() => {
-    if (logContainerRef.current) {
+    if (logContainerRef.current && logs.length > 0) {
       logContainerRef.current.scrollTo(0, logContainerRef.current.scrollHeight);
     }
-  }, []);
+  }, [logs.length]); // Only scroll when logs count changes
 
   const toggleExpand = (index) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -80,7 +81,7 @@ const LogConsole = ({ simulationMode }) => {
           </div>
 
           <div ref={logContainerRef} className={styles.logsContainer}>
-            {logs.slice(-20).map((log, index) => (
+            {logs.slice(-10).map((log, index) => ( // Show only last 10 logs instead of 20 for memory optimization
               <div key={index} className={styles.logEntry}>
                 <div
                   className={styles.logHeader}

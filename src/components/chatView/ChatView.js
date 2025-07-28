@@ -7,7 +7,7 @@ import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
 
-const MAX_MESSAGES = 15; // More aggressive memory optimization - reduced from 100 to 15
+const MAX_MESSAGES = 15;
 
 const ChatView = ({
   setCurrentView,
@@ -39,7 +39,7 @@ const ChatView = ({
     setSuggestedAnswer,
   });
 
-  const { handleLLMResponse, startRecording, stopRecording, isPlayingTTS, handleTextToSpeech } = useChat({
+  const { handleLLMResponse, startRecording, stopRecording, stopAllTTS, isPlayingTTS, handleTextToSpeech } = useChat({
     setCurrentView,
     setMessagesToShow,
     setIsTyping,
@@ -100,10 +100,18 @@ const ChatView = ({
       } else {
         updatedMessages = [...prev, { sender: "user", text }];
       }
-      // Limit message history to prevent memory accumulation
-      return updatedMessages.length > MAX_MESSAGES 
-        ? updatedMessages.slice(-MAX_MESSAGES) 
-        : updatedMessages;
+      // Smart message limiting - prioritize valid messages over failed ones
+      const validMessages = updatedMessages.filter(msg => 
+        msg.text && 
+        msg.text.trim().length > 0 && 
+        !msg.failed && 
+        !msg.typing &&
+        !msg.text.includes("I'm having trouble understanding")
+      );
+      if (validMessages.length > MAX_MESSAGES) {
+        return updatedMessages.slice(-MAX_MESSAGES - 2); // Keep extra for system messages
+      }
+      return updatedMessages;
     });
 
     // Use LLM chat instead of Dataworkz to maintain session continuity

@@ -6,7 +6,7 @@ const useChatSimulate = ({
   setIsTyping,
   setSuggestedAnswer,
 }) => {
-  const MAX_MESSAGES = 15; // More aggressive memory optimization - reduced from 100 to 15
+  const MAX_MESSAGES = 15;
   const [messageIndex, setMessageIndex] = useState(0);
 
   const messages = [];
