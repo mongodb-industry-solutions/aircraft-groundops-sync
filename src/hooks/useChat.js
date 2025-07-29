@@ -40,53 +40,45 @@ const useChat = ({
   const [greetingSent, setGreetingSent] = useState(false);
   const [checklistCompletionSent, setChecklistCompletionSent] = useState(false);
   
-  // More aggressive memory cleanup function
-  const forceMemoryCleanup = () => {
-    try {
-      const audioElements = document.querySelectorAll('audio');
-      audioElements.forEach(audio => {
+  // Utility function to check if message is a greeting
+  const isGreetingMessage = (text) => {
+    return text.includes("Hi, I'm Leafy") || 
+           text.includes("would you like to make a question or begin your voice checklist") ||
+           text.includes("Hello! I'm Leafy") ||
+           text.includes("I'm here to help you") ||
+           text.includes("Hi, I'm Leafy, would you like to make a question or begin your voice checklist?");
+  };
+  
+  // Utility function to check if message is a completion message
+  const isCompletionMessage = (text) => {
+    return text.includes("Checklist complete!");
+  };
+  
+  // Centralized audio cleanup utility
+  const cleanupAudioElements = () => {
+    const audioElements = document.querySelectorAll('audio');
+    audioElements.forEach(audio => {
+      try {
         if (!audio.paused) {
           audio.pause();
         }
         audio.src = '';
         audio.load();
         audio.remove();
-      });
-      
-      // Clear any video elements that might exist
-      const videoElements = document.querySelectorAll('video');
-      videoElements.forEach(video => {
-        if (!video.paused) {
-          video.pause();
-        }
-        video.src = '';
-        video.load();
-        video.remove();
-      });
-      
-      // Clear any canvas elements to free memory
-      const canvasElements = document.querySelectorAll('canvas');
-      canvasElements.forEach(canvas => {
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-      });
-      
+      } catch (e) {
+        console.warn("Error cleaning audio element:", e);
+      }
+    });
+  };
+  
+  const forceMemoryCleanup = () => {
+    try {
+      cleanupAudioElements();
+
       // Force garbage collection if available
       if (typeof window !== 'undefined' && window.gc) {
         window.gc();
       }
-      
-      // Production memory reporting (disabled for performance)
-      // if (typeof window !== 'undefined' && window.performance && window.performance.memory) {
-      //   const memInfo = window.performance.memory;
-      //   //console.log('Memory usage:', {
-      //     used: Math.round(memInfo.usedJSHeapSize / 1048576) + 'MB',
-      //     total: Math.round(memInfo.totalJSHeapSize / 1048576) + 'MB',
-      //     limit: Math.round(memInfo.jsHeapSizeLimit / 1048576) + 'MB'
-      //   });
-      // }
     } catch (error) {
         console.warn("Error during memory cleanup:", error);
       }
@@ -97,25 +89,13 @@ const useChat = ({
       //console.log("Stopping all TTS playback");
       isPlayingTTSRef.current = false;
       currentTTSMessageIndexRef.current = -1; 
-      const audioElements = document.querySelectorAll('audio');
-      audioElements.forEach(audio => {
-        try {
-          if (!audio.paused) {
-            audio.pause();
-            audio.currentTime = 0;
-          }
-          audio.src = '';
-          audio.load();
-        } catch (e) {
-          console.warn("Error stopping audio element:", e);
-        }
-      });
+      cleanupAudioElements();
     }
   };
 
   // Reduce frequency of memory cleanup to save CPU cycles and potential memory overhead
   useEffect(() => {
-    const cleanup = setInterval(forceMemoryCleanup, 60000); // Increased to every 60 seconds for production
+    const cleanup = setInterval(forceMemoryCleanup, 120000); // Further increased to every 2 minutes for better performance
     return () => clearInterval(cleanup);
   }, []);
   const getStepNumber = (step, index) => {
@@ -273,12 +253,8 @@ const useChat = ({
           }
           setIsTyping(false);
           if (partialMessage && !isSpeakerMuted && !isManualMode) {
-            const isGreeting = partialMessage.includes("Hi, I'm Leafy") || 
-                              partialMessage.includes("would you like to make a question or begin your voice checklist") ||
-                              partialMessage.includes("Hello! I'm Leafy") ||
-                              partialMessage.includes("I'm here to help you") ||
-                              partialMessage.includes("Hi, I'm Leafy, would you like to make a question or begin your voice checklist?");
-            const isCompletionMessage = partialMessage.includes("Checklist complete!");
+            const isGreeting = isGreetingMessage(partialMessage);
+            const isCompletion = isCompletionMessage(partialMessage);
             
             if (isGreeting && greetingSent) {
               //console.log("Skipping repeated greeting:", partialMessage.slice(0, 50) + "...");
@@ -287,7 +263,7 @@ const useChat = ({
               return;
             }
             
-            if (isCompletionMessage && !partialMessage.includes("Well done")) {
+            if (isCompletion && !partialMessage.includes("Well done")) {
               //console.log("Skipping LLM checklist completion message (handled separately):", partialMessage.slice(0, 50) + "...");
               partialMessage = null;
               setTimeout(forceMemoryCleanup, 100);
@@ -343,19 +319,15 @@ const useChat = ({
             return;
           }
           
-          const isGreeting = newContent.includes("Hi, I'm Leafy") || 
-                            newContent.includes("would you like to make a question or begin your voice checklist") ||
-                            newContent.includes("Hello! I'm Leafy") ||
-                            newContent.includes("I'm here to help you") ||
-                            newContent.includes("Hi, I'm Leafy, would you like to make a question or begin your voice checklist?");
-          const isCompletionMessage = newContent.includes("Checklist complete!");
+          const isGreeting = isGreetingMessage(newContent);
+          const isCompletion = isCompletionMessage(newContent);
           
           if (isGreeting && greetingSent) {
             //console.log("Skipping repeated greeting in UI:", newContent.slice(0, 30) + "...");
             return;
           }
           
-          if (isCompletionMessage && !newContent.includes("Well done")) {
+          if (isCompletion && !newContent.includes("Well done")) {
             //console.log("Skipping LLM checklist completion in UI (handled separately):", newContent.slice(0, 30) + "...");
             return;
           }
@@ -815,16 +787,15 @@ const useChat = ({
           const { value, done } = await reader.read();
           if (done) {
             if (partialMessage && !isSpeakerMuted && !isManualMode) {
-              const isGreeting = partialMessage.includes("Hi, I'm Leafy") || 
-                                partialMessage.includes("would you like to make a question or begin your voice checklist");
-              const isCompletionMessage = partialMessage.includes("Checklist complete!");
+              const isGreeting = isGreetingMessage(partialMessage);
+              const isCompletion = isCompletionMessage(partialMessage);
               
               if (isGreeting && greetingSent) {
                 ////console.log("Skipping repeated greeting in function response:", partialMessage);
                 return;
               }
               
-              if (isCompletionMessage && !partialMessage.includes("Well done")) {
+              if (isCompletion && !partialMessage.includes("Well done")) {
                 ////console.log("Skipping LLM checklist completion in function response (handled separately):", partialMessage);
                 return;
               }
@@ -841,20 +812,15 @@ const useChat = ({
 
           partialMessage += decoder.decode(value, { stream: true });
 
-          const isGreeting = partialMessage.includes("Hi, I'm Leafy") || 
-                            partialMessage.includes("would you like to make a question or begin your voice checklist");
-          const isCompletionMessage = partialMessage.includes("Checklist complete!");
+          const isGreeting = isGreetingMessage(partialMessage);
+          const isCompletion = isCompletionMessage(partialMessage);
           
           if (isGreeting && greetingSent) {
             //console.log("Skipping repeated greeting in function response UI:", partialMessage);
             return;
           }
           
-          if (isCompletionMessage && !partialMessage.includes("Well done")) {
-            //console.log("Skipping LLM checklist completion in function response UI (handled separately):", partialMessage);
-            return;
-          }
-          if (isCompletionMessage && !partialMessage.includes("Well done")) {
+          if (isCompletion && !partialMessage.includes("Well done")) {
             //console.log("Skipping LLM checklist completion in function response UI (handled separately):", partialMessage);
             return;
           }
@@ -1055,25 +1021,12 @@ const useChat = ({
       console.warn("Error closing audio context:", e);
     }
     
-    // Aggressive memory cleanup
-    if (typeof window !== 'undefined') {
-      if (window.gc) {
-        setTimeout(() => window.gc(), 100);
-      }
-      
-      // Clear any remaining audio elements
-      const audioElements = document.querySelectorAll('audio');
-      audioElements.forEach(audio => {
-        try {
-          if (!audio.paused) {
-            audio.pause();
-          }
-          audio.src = '';
-          audio.load();
-        } catch (e) {
-          console.warn("Error cleaning audio element:", e);
-        }
-      });
+    // Use centralized cleanup
+    cleanupAudioElements();
+    
+    // Force garbage collection if available
+    if (typeof window !== 'undefined' && window.gc) {
+      setTimeout(() => window.gc(), 100);
     }
   };
 
@@ -1081,17 +1034,17 @@ const useChat = ({
     return new Promise(async (resolve, reject) => {
       try {
         const isManualModeMessage = text.includes("Manual checklist configuration enabled");
-        const isCompletionMessage = text.includes("Checklist complete!");
+        const isCompletion = isCompletionMessage(text);
         
         // Prevent duplicate completion messages in TTS
-        if (isCompletionMessage && !text.includes("Well done")) {
+        if (isCompletion && !text.includes("Well done")) {
           //console.log("Skipping LLM checklist completion TTS (handled separately):", text.slice(0, 50) + "...");
           resolve();
           return;
         }
         
         // Check if manual mode is enabled (but allow the manual mode announcement itself)
-        if (isManualMode && !isManualModeMessage && !isCompletionMessage) {
+        if (isManualMode && !isManualModeMessage && !isCompletion) {
           //console.log("Skipping TTS - manual mode enabled, text:", text.slice(0, 50) + "...");
           resolve();
           return;
@@ -1147,7 +1100,7 @@ const useChat = ({
             audio.load();
             audio.remove();
             // Force memory cleanup after TTS
-            setTimeout(forceMemoryCleanup, 100); // Increased delay for production
+            setTimeout(forceMemoryCleanup, 100);
             resolve();
           });
 
@@ -1160,7 +1113,7 @@ const useChat = ({
             audio.load();
             audio.remove();
             // Force memory cleanup after TTS error
-            setTimeout(forceMemoryCleanup, 100); // Increased delay for production
+            setTimeout(forceMemoryCleanup, 100);
             reject(error);
           });
 

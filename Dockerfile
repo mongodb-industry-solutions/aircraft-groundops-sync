@@ -13,6 +13,8 @@ RUN npm install --legacy-peer-deps
 # Copy the rest of the application code
 COPY . .
 
+RUN npm run build
+
 EXPOSE 3000
 
 # Command to run the application
