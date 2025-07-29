@@ -148,7 +148,7 @@ const useChat = ({
   }, [selectedOperation, setIsManualMode]);
 
   // Web Socket Config
-  const protocol = process.env.NEXT_PUBLIC_ENV === "local" ? "ws" : "wss";
+  const protocol = (typeof window !== "undefined" && window.location.protocol === "https:") ? "wss" : "ws";
   const host = typeof window !== "undefined" ? window.location.host : "";
 
   const handleLLMResponse = async (userMessage) => {
@@ -159,10 +159,7 @@ const useChat = ({
     setMessagesToShow((prev) => {
       const updatedMessages = [...prev, { sender: "assistant", text: "" }];
       assistantMessageIndex = updatedMessages.length - 1;
-      
-      // Track this message index for TTS interrupt logic
       currentTTSMessageIndexRef.current = assistantMessageIndex;
-      
       // Only limit valid messages to prevent memory buildup while keeping error/retry messages
       const validMessages = getValidMessages(updatedMessages);
       if (validMessages.length > MAX_MESSAGES) {
@@ -186,12 +183,15 @@ const useChat = ({
       if (!response.ok) {
         console.error("LLM API error:", response.status, response.statusText);
         setIsTyping(false);
+        
+        const errorMessage = "I'm having trouble processing that. Could you please say 'done' when you've completed the step, or let me know if you'd prefer to use the manual checklist?";
+        
         setMessagesToShow((prev) => {
           const updatedMessages = [
             ...prev.slice(0, -1), // Remove the empty assistant message
             { 
               sender: "assistant", 
-              text: "I'm having trouble processing that. Could you please say 'done' when you've completed the step, or let me know if you'd prefer to use the manual checklist?"
+              text: errorMessage
             }
           ];
           return updatedMessages.length > MAX_MESSAGES 
@@ -206,7 +206,7 @@ const useChat = ({
         setIsTyping(false);
         setMessagesToShow((prev) => {
           const updatedMessages = [
-            ...prev.slice(0, -1), // Remove the empty assistant message
+            ...prev.slice(0, -1), 
             { 
               sender: "assistant", 
               text: "I'm having trouble understanding. Please say 'done' when ready, or I can switch you to manual mode."
@@ -451,14 +451,33 @@ const useChat = ({
             if (!response.ok) {
               const errorText = await response.text();
               console.error("API response error:", response.status, errorText);
+              
               let errorResponse = "I'm having trouble getting the checklist. Let me try again in a moment.";
+              
               replyToFunctionCall(functionCall.name, errorResponse);
-              addLog(sessionId, functionCall.name, "error", { error: errorText });
+              addLog(sessionId, functionCall.name, "error", { 
+                status: response.status,
+                error: errorText 
+              });
               resolve();
               break;
             }
 
-            const checklistData = await response.json();
+            let checklistData;
+            try {
+              const responseText = await response.text();
+              checklistData = JSON.parse(responseText);
+            } catch (jsonError) {
+              console.error("Failed to parse checklist response as JSON:", jsonError);
+              let errorResponse = "I received an invalid response from the checklist service. Please try again or contact support.";
+              replyToFunctionCall(functionCall.name, errorResponse);
+              addLog(sessionId, functionCall.name, "error", { 
+                error: "JSON parse error",
+                details: jsonError.message 
+              });
+              resolve();
+              break;
+            }
             // //console.log('Raw checklist API response:', JSON.stringify(checklistData, null, 2));
             
             if (checklistData.error) {
@@ -1075,7 +1094,26 @@ const useChat = ({
           body: JSON.stringify({ text }),
         });
 
-        const { audioContent } = await audioResponse.json();
+        if (!audioResponse.ok) {
+          console.warn(`TTS API error: ${audioResponse.status} ${audioResponse.statusText}`);
+          isPlayingTTSRef.current = false;
+          currentTTSMessageIndexRef.current = -1;
+          resolve(); // Silently fail TTS but continue
+          return;
+        }
+
+        let responseData;
+        try {
+          responseData = await audioResponse.json();
+        } catch (jsonError) {
+          console.warn("TTS response is not valid JSON:", jsonError);
+          isPlayingTTSRef.current = false;
+          currentTTSMessageIndexRef.current = -1;
+          resolve(); // Silently fail TTS but continue
+          return;
+        }
+
+        const { audioContent } = responseData;
 
         if (audioContent) {
           const audio = new Audio(`data:audio/wav;base64,${audioContent}`);

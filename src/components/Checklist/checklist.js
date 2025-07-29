@@ -38,9 +38,17 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API Error:', response.status, errorText);
-          throw new Error(`API endpoint returned ${response.status}: ${errorText}`);
+          throw new Error('Failed to fetch checklist data');
         } else {
-          const data = await response.json();
+          const responseText = await response.text();          
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (jsonError) {
+            console.error('Invalid JSON response:', responseText);
+            throw new Error('Failed to fetch checklist data');
+          }
+          
           //console.log('Fetched checklist data:', data);
           setChecklistData(data);
         }

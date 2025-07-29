@@ -96,7 +96,20 @@ const ChatView = ({
       }
       return updatedMessages;
     });
-    await handleLLMResponse(text);
+    
+    try {
+      await handleLLMResponse(text);
+    } catch (error) {
+      console.error("Error in submitMessage:", error);
+      setMessagesToShow((prev) => [
+        ...prev,
+        { 
+          sender: "assistant", 
+          text: "I'm having trouble processing that. Could you please say 'done' when you've completed the step, or let me know if you'd prefer to use the manual checklist?",
+          failed: true
+        }
+      ]);
+    }
   };
 
   useEffect(() => {
