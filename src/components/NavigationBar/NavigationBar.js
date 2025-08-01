@@ -3,14 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./NavigationBar.module.css";
-import InfoWizard from "@/components/InfoWizard/InfoWizard";
+import InfoWizard from "@/components/infoWizard/InfoWizard";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 
-
 const NavigationBar = () => {
   const [openHelpModal, setOpenHelpModal] = useState(false);
-  const pathname = usePathname(); 
+  const pathname = usePathname();
 
   return (
     <nav className={styles.navbar}>
@@ -25,8 +24,7 @@ const NavigationBar = () => {
           />
         </Link>
       </div>
-      <div className={styles.linkContainer}>
-      </div>
+      <div className={styles.linkContainer}></div>
 
       <InfoWizard
         open={openHelpModal}
@@ -45,57 +43,56 @@ const NavigationBar = () => {
                 heading: "How to Demo",
                 body: [
                   {
-                    heading: 'Shopfloor Simulator',
+                    heading: "Shopfloor Simulator",
                     body: [
-                      'Click on Start Shopfloor Simulation',
-                      'This will trigger the machines to default temperature and vibration values to “0” and will track their changes as the process is being fulfilled.'
-                    ]
+                      "Click on Start Shopfloor Simulation",
+                      "This will trigger the machines to default temperature and vibration values to “0” and will track their changes as the process is being fulfilled.",
+                    ],
                   },
                   {
-                    heading: 'Work Orders',
+                    heading: "Work Orders",
                     body: [
-                      'Once the simulation is running, go to the Work orders tab and allow the Table of Work Orders History to be shown',
+                      "Once the simulation is running, go to the Work orders tab and allow the Table of Work Orders History to be shown",
                       'Fill in the "Create a New Work Order” form, and select the desired product (Cogwheel or Gear housing) & quantity for target output and Submit.',
-                      'Wait a few seconds for the work order to be received, it will be shown on the Work Orders history under “Created” status'
-                    ]
+                      "Wait a few seconds for the work order to be received, it will be shown on the Work Orders history under “Created” status",
+                    ],
                   },
                   {
-                    heading: 'Jobs',
+                    heading: "Jobs",
                     body: [
-                      'With a new Work Order created, go to the Jobs tab you’ll be able to select it in the job form from the dropdown field and choose the production line (machines get self populated).',
-                      'Wait a few seconds for the job to be received, it will be shown on the Jobs History under “Created” status and on the Job Progress table with the current Job ID being executed. ',
-                      'The quality rate and nOK products will remain blank until the job is completed.'
-                    ]
+                      "With a new Work Order created, go to the Jobs tab you’ll be able to select it in the job form from the dropdown field and choose the production line (machines get self populated).",
+                      "Wait a few seconds for the job to be received, it will be shown on the Jobs History under “Created” status and on the Job Progress table with the current Job ID being executed. ",
+                      "The quality rate and nOK products will remain blank until the job is completed.",
+                    ],
                   },
                   {
-                    heading: 'View Machine Status',
+                    heading: "View Machine Status",
                     body: [
-                      'Return to the Shofloor Simulator tab where you’ll be able to review the factory details, Availability of the machines, temperature, vibration, last maintenance and their stats.',
-                      'Every time a job is being executed, the Machines status will change from “Available” to “Running” depending on the selected production line.',
-                    ]
+                      "Return to the Shofloor Simulator tab where you’ll be able to review the factory details, Availability of the machines, temperature, vibration, last maintenance and their stats.",
+                      "Every time a job is being executed, the Machines status will change from “Available” to “Running” depending on the selected production line.",
+                    ],
                   },
                   {
-                    heading: 'Change Machine Vibration and Temperature',
+                    heading: "Change Machine Vibration and Temperature",
                     body: [
-                      'Update the Temperature and Vibration per machine, depending on the selected range, you’ll visualize ifthe values are Normal, High or Excessive from the already established threshold.',
-                      'When the values are submitted in the form, if sent to a “Running” machine (from an active job), it will directly aect the nOK products and quality rate and will be shown in the machine’s JSON data',
-                      'With the Simulation running, you can see the Chart retrieving information every minute',
-                      'Once the job is “Completed” the machine status will return to Available”.'
-                    ]
+                      "Update the Temperature and Vibration per machine, depending on the selected range, you’ll visualize ifthe values are Normal, High or Excessive from the already established threshold.",
+                      "When the values are submitted in the form, if sent to a “Running” machine (from an active job), it will directly aect the nOK products and quality rate and will be shown in the machine’s JSON data",
+                      "With the Simulation running, you can see the Chart retrieving information every minute",
+                      "Once the job is “Completed” the machine status will return to Available”.",
+                    ],
                   },
                   {
-                    heading: 'Review Quality Rate and nOK Parts',
+                    heading: "Review Quality Rate and nOK Parts",
                     body: [
-                      'Once the job is under “Completed” status, we’ll no longer see it in the “Jobs Progress” table and we’ll be able to review the nOK parts and quality rate depending on the values sent in the “Change machine values” form',
-                    ]
+                      "Once the job is under “Completed” status, we’ll no longer see it in the “Jobs Progress” table and we’ll be able to review the nOK parts and quality rate depending on the values sent in the “Change machine values” form",
+                    ],
                   },
                   {
-                    heading: 'Review Planned vs. Actual Cost',
+                    heading: "Review Planned vs. Actual Cost",
                     body: [
-                      'Once the job is under “Completed” status, under Work Orders tab, we’ll be able to see the planned and actual Cost, this will dier wether if our quality rate is other than 100%',
-                    ]
+                      "Once the job is under “Completed” status, under Work Orders tab, we’ll be able to see the planned and actual Cost, this will dier wether if our quality rate is other than 100%",
+                    ],
                   },
-
                 ],
               },
             ],
@@ -146,7 +143,6 @@ const NavigationBar = () => {
           },
         ]}
       />
-
     </nav>
   );
 };

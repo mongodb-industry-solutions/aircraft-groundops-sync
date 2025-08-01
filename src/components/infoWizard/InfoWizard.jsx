@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { H3, Body } from "@leafygreen-ui/typography";
 import Icon from "@leafygreen-ui/icon";
 import PropTypes from "prop-types";
-import styles from "./InfoWizard.module.css";
+import styles from "./infoWizard.module.css";
 import Button from "@leafygreen-ui/button";
 import { Tabs, Tab } from "@leafygreen-ui/tabs";
 
@@ -12,19 +12,19 @@ import { Tabs, Tab } from "@leafygreen-ui/tabs";
 const CustomModal = ({ open, setOpen, children, className }) => {
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setOpen(false);
       }
     };
 
     if (open) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [open, setOpen]);
 
@@ -32,11 +32,11 @@ const CustomModal = ({ open, setOpen, children, className }) => {
 
   return (
     <div className={styles.modalOverlay} onClick={() => setOpen(false)}>
-      <div 
-        className={`${styles.modalContainer} ${className || ''}`} 
+      <div
+        className={`${styles.modalContainer} ${className || ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button 
+        <button
           className={styles.modalCloseButton}
           onClick={() => setOpen(false)}
           aria-label="Close modal"
@@ -61,30 +61,41 @@ const InfoWizard = ({
   return (
     <>
       <div className={styles.infoWizardButton}>
-        <Button onClick={() => setOpen((prev) => !prev)} leftGlyph={<Icon glyph={iconGlyph} />}>
+        <Button
+          onClick={() => setOpen((prev) => !prev)}
+          leftGlyph={<Icon glyph={iconGlyph} />}
+        >
           Tell me more!
         </Button>
       </div>
 
       <CustomModal open={open} setOpen={setOpen} className={styles.modal}>
         <div className={styles.modalContent}>
-          <Tabs aria-label="info wizard tabs" setSelected={setSelected} selected={selected}>
+          <Tabs
+            aria-label="info wizard tabs"
+            setSelected={setSelected}
+            selected={selected}
+          >
             {sections.map((tab, tabIndex) => (
               <Tab key={tabIndex} name={tab.heading}>
                 {tab.content.map((section, sectionIndex) => (
                   <div key={sectionIndex} className={styles.section}>
-                    {section.heading && <H3 className={styles.modalH3}>{section.heading}</H3>}
+                    {section.heading && (
+                      <H3 className={styles.modalH3}>{section.heading}</H3>
+                    )}
                     {section.body &&
                       (Array.isArray(section.body) ? (
                         <ul className={styles.list}>
-                          {section.body.map((item, idx) => (
+                          {section.body.map((item, idx) =>
                             typeof item === "object" ? (
                               <li key={idx}>
                                 {item.heading}
                                 <ul className={styles.list}>
                                   {item.body.map((subItem, subIdx) => (
                                     <li key={subIdx}>
-                                      <Body className={styles.body}>{subItem}</Body>
+                                      <Body className={styles.body}>
+                                        {subItem}
+                                      </Body>
                                     </li>
                                   ))}
                                 </ul>
@@ -94,8 +105,7 @@ const InfoWizard = ({
                                 <Body className={styles.body}>{item}</Body>
                               </li>
                             )
-                          ))}
-
+                          )}
                         </ul>
                       ) : (
                         <Body className={styles.body}>{section.body}</Body>
