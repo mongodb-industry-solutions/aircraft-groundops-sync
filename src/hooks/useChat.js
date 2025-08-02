@@ -1046,7 +1046,6 @@ const useChat = ({
           return;
         }
         
-        // Check if manual mode is enabled 
         if (isManualMode && !isManualModeMessage && !isCompletion) {
           //console.log("Skipping TTS - manual mode enabled, text:", text.slice(0, 50) + "...");
           resolve();
@@ -1186,9 +1185,7 @@ const useChat = ({
           //console.log("Checklist completion already handled, skipping duplicate");
           return;
         }
-        setChecklistCompletionSent(true);
-        
-        // Stop any ongoing TTS before completion message
+        setChecklistCompletionSent(true);        
         stopAllTTS();
         
         const congratsMessage = `Checklist complete! Well done. Is there anything else I can help you with today, or would you like me to close the session?`;
