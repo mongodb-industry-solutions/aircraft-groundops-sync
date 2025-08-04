@@ -19,17 +19,30 @@ const useChat = ({
 }) => {
   const MAX_MESSAGES = 10; 
   
-  // filter valid messages for counting
+  // filter valid messages for counting and display
   const getValidMessages = (messages) => {
     return messages.filter(msg => 
       msg.text && 
       msg.text.trim().length > 0 && 
       !msg.failed && 
       !msg.typing &&
+      !msg.isProcessing &&
       !msg.text.includes("I'm having trouble understanding") && // Exclude error messages from count
       msg.text.trim() !== "" // Exclude blank (empty) messages
     );
   };
+
+  const getMessagesForDisplay = (messages) => {
+    return messages.filter(msg => {
+      if (msg.sender === "user") return true;
+      if (msg.sender === "assistant") {
+        return msg.text && msg.text.trim().length > 0 || msg.typing;
+      }
+      
+      return true;
+    });
+  };
+
   const socketRef = useRef(null);
   const processorRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -150,7 +163,7 @@ const useChat = ({
     setIsTyping(true);
     let assistantMessageIndex;
     setMessagesToShow((prev) => {
-      const updatedMessages = [...prev, { sender: "assistant", text: "" }];
+      const updatedMessages = [...prev, { sender: "assistant", text: "", isProcessing: true }];
       assistantMessageIndex = updatedMessages.length - 1;
       currentTTSMessageIndexRef.current = assistantMessageIndex;
       // Only limit valid messages to prevent memory buildup while keeping error/retry messages
@@ -238,7 +251,6 @@ const useChat = ({
       try {
         const { value, done } = await reader.read();
         if (done) {
-          // Clean up reader when done
           try {
             reader.releaseLock();
           } catch (e) {
@@ -342,7 +354,6 @@ const useChat = ({
         processStream();
       } catch (error) {
         console.error("Error processing stream:", error);
-        // Clean up on error
         try {
           reader.releaseLock();
         } catch (cleanupError) {
@@ -514,6 +525,10 @@ const useChat = ({
         case "markStepCompleted":
           try {
             const { stepNumber, stepText } = functionCall.args;
+            
+            // GUARANTEE stopAllTTS when marking step completed (checklist speech)
+            stopAllTTS();
+            
             const stepCompletionData = {
               stepNumber,
               stepText,
@@ -676,7 +691,9 @@ const useChat = ({
           try {
             const { reason } = functionCall.args;
             //console.log(`Switching to manual mode: ${reason}`);
-            stopAllTTS();            
+            
+            stopAllTTS();
+            
             if (isRecording) {
               stopRecording();
             }
@@ -718,6 +735,19 @@ const useChat = ({
 
   const replyDirectToUser = async (functionName, content) => {
     setIsTyping(false);
+    
+    // Check for greeting duplication
+    const isGreeting = isGreetingMessage(content);
+    if (isGreeting && greetingSent) {
+      //console.log("Skipping repeated greeting in replyDirectToUser:", content.slice(0, 50) + "...");
+      return;
+    }
+    
+    if (isGreeting) {
+      setGreetingSent(true);
+      //console.log("First greeting detected in replyDirectToUser, marking as sent");
+    }
+    
     setMessagesToShow((prev) => {
       const updatedMessages = [...prev, { 
         sender: "assistant", 
@@ -731,7 +761,7 @@ const useChat = ({
       return updatedMessages;
     });
 
-    // Trigger TTS for the response
+    // Trigger TTS for the response (skip if duplicate greeting)
     if (!isSpeakerMuted && !isManualMode) {
       await handleTextToSpeech(content);
     }
@@ -887,7 +917,7 @@ const useChat = ({
       if (data.final && data.text.trim() !== "") {
         //console.log("Speech recognized:", data.text);
         
-        // Simplified echo detection for production memory optimization
+        // Simplified echo detection
         setMessagesToShow((prev) => {
           const recentAssistantMessages = prev
             .filter(msg => msg.sender === "assistant" && msg.text)
@@ -1052,22 +1082,17 @@ const useChat = ({
         if (isManualModeMessage) {
           //console.log("Speaking manual mode announcement, then stopping all TTS");
         }
-        
         if (messageIndex !== -1 && messageIndex < currentTTSMessageIndexRef.current) {
           //console.log(`Skipping TTS for outdated message #${messageIndex}, current is #${currentTTSMessageIndexRef.current}`);
           resolve();
           return;
         }
-        
-        // Stop any recording before TTS
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
           stopRecording();
         }
-        
         stopAllTTS();
         isPlayingTTSRef.current = true;
         currentTTSMessageIndexRef.current = messageIndex; 
-        
         const audioResponse = await fetch("/api/gcp/textToSpeech", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1105,7 +1130,6 @@ const useChat = ({
               audio.src = '';
               audio.load();
             } catch (e) {
-              // Ignore cleanup errors
             }
             resolve();
             return;
@@ -1139,7 +1163,6 @@ const useChat = ({
             audio.remove();
           } catch (e) {
           }
-          // Don't reject audio errors, just resolve to continue
           resolve();
         };
 
@@ -1160,7 +1183,6 @@ const useChat = ({
                 audio.load();
                 audio.remove();
               } catch (e) {
-                // Ignore cleanup errors
               }
               resolve();
             });
@@ -1201,7 +1223,10 @@ const useChat = ({
         if (!isManualMode) {
           //console.log("Switching to manual mode");          
           setIsManualMode(true);
+          
+          // GUARANTEE stopAllTTS is called immediately when user completes manual steps
           stopAllTTS();
+          
           if (isRecording) {
             stopRecording();
           }
@@ -1241,7 +1266,7 @@ const useChat = ({
         setChecklistCompletionSent(true);        
         stopAllTTS();
         
-        const congratsMessage = `Checklist complete! Well done. Is there anything else I can help you with today, or would you like me to close the session?`;
+        const congratsMessage = `Checklist complete! Well done. Closing outbound operation session.`;
         setMessagesToShow((prev) => [
           ...prev,
           { 
@@ -1287,6 +1312,7 @@ const useChat = ({
     stopAllTTS,
     isPlayingTTS: () => isPlayingTTSRef.current,
     handleTextToSpeech,
+    getMessagesForDisplay,
   };
 };
 

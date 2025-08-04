@@ -26,7 +26,7 @@ const ChatView = ({
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
 
-  const { handleLLMResponse, startRecording, stopRecording, stopAllTTS, isPlayingTTS, handleTextToSpeech } = useChat({
+  const { handleLLMResponse, startRecording, stopRecording, stopAllTTS, isPlayingTTS, handleTextToSpeech, getMessagesForDisplay } = useChat({
     setCurrentView,
     setMessagesToShow,
     setIsTyping,
@@ -41,6 +41,9 @@ const ChatView = ({
     isManualMode,
     setIsManualMode,
   });
+
+  // Filter messages for display
+  const displayMessages = getMessagesForDisplay ? getMessagesForDisplay(messagesToShow) : messagesToShow;
 
   useEffect(() => {
     if (messagesToShow.length === 0) {
@@ -138,12 +141,12 @@ const ChatView = ({
   return (
     <div className={styles.chatViewContainer}>
       <div className={`${styles.conversationContainer} ${selectedOperation ? styles.checklistContext : ''}`}>
-        {messagesToShow.map((msg, index) => (
+        {displayMessages.map((msg, index) => (
           <Message
             key={index}
             message={msg}
             isRecording={isRecording}
-            isLastMessage={index === messagesToShow.length - 1}
+            isLastMessage={index === displayMessages.length - 1}
             isFirstMessage={index === 0}
           />
         ))}

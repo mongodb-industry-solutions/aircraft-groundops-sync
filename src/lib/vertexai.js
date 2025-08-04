@@ -91,15 +91,15 @@ const functionDeclarations = [
           required: ["view"],
         },
       },
-      {
-        name: "recalculateRoute",
-        description:
-          "Recalculates the route when a new stop is added. By default this function will find the neares service station. Ask the user to confirm this action before executing.",
-        parameters: {
-          type: FunctionDeclarationSchemaType.OBJECT,
-          properties: {},
-        },
-      },
+      // {
+      //   name: "recalculateRoute",
+      //   description:
+      //     "Recalculates the route when a new stop is added. By default this function will find the neares service station. Ask the user to confirm this action before executing.",
+      //   parameters: {
+      //     type: FunctionDeclarationSchemaType.OBJECT,
+      //     properties: {},
+      //   },
+      // },
       {
         name: "consultManual",
         description: "Retrieves relevant information from the car manual.",

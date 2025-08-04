@@ -51,7 +51,7 @@ export const SAMPLE_CONVERSATION = [
   },
   {
     sender: "assistant",
-    text: "Checklist complete! Well done. Is there anything else I can help you with today, or would you like me to close the session?"
+    text: "Checklist complete! Well done. Closing outbound operation session."
   },
   {
     sender: "user",
