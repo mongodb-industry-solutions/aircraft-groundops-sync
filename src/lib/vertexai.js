@@ -115,15 +115,7 @@ const functionDeclarations = [
           required: ["query"],
         },
       },
-      // {
-      //   name: "fetchDTCCodes",
-      //   description:
-      //     "Fetches active Diagnostic Trouble Codes (DTCs) in the format OBD II (SAE-J2012DA_201812) from the vehicle to assist with troubleshooting.",
-      //   parameters: {
-      //     type: FunctionDeclarationSchemaType.OBJECT,
-      //     properties: {},
-      //   },
-      // },
+
     ],
   },
 ];
@@ -137,9 +129,9 @@ const generativeModel = vertexAIClient.getGenerativeModel({
     },
   ],
   generationConfig: { 
-    maxOutputTokens: 200,  // Reduced from 300 to 200 to save memory
-    temperature: 0.7,      // Lower temperature for more focused responses
-    topP: 0.8              // Reduced for more deterministic outputs
+    maxOutputTokens: 200,  
+    temperature: 0.7,     
+    topP: 0.8             
   },
   systemInstruction: {
     role: "system",
@@ -244,7 +236,7 @@ const generativeModel = vertexAIClient.getGenerativeModel({
         
         MANUAL COMPLETION BEHAVIOR:
         - If user completes steps manually (clicks checklist items), IMMEDIATELY STOP speaking any current step
-        - When manual completion is detected, say ONLY: "Manual checklist configuration enabled, speech stops"
+        - When manual completion is detected, say ONLY: "Manual checklist configuration enabled"
         - Do NOT continue reading subsequent steps automatically after manual completion
         - Do NOT read any overlapping messages or continue any previous step reading
         - IMMEDIATELY halt all speech output when manual mode is activated
@@ -284,7 +276,7 @@ const generativeModel = vertexAIClient.getGenerativeModel({
 // Memory management: Track session creation times and periodically clean up old sessions
 let chatSessions = {};
 const sessionTimestamps = {};
-const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes instead of 10 for more aggressive cleanup
+const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes cleanup
 
 export const startChatSession = (sessionId) => {
   if (!chatSessions[sessionId]) {
@@ -310,7 +302,6 @@ const cleanupOldSessions = () => {
   });
 };
 
-// Run cleanup every 3 minutes instead of 5 for more frequent cleanup
 setInterval(cleanupOldSessions, 3 * 60 * 1000);
 
 export const clearChatSession = (sessionId) => {

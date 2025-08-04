@@ -569,7 +569,6 @@ const useChat = ({
                     responseData = `Step ${stepNumber} marked as completed: ${stepText}. Next: Step ${nextStepNumber}: "${nextStep.step}"`;
                   } else {
                     responseData = `Step ${stepNumber} marked as completed: ${stepText}.`;
-                    // Trigger checklist completion callback
                     if (onChecklistCompleted) {
                       onChecklistCompleted(checklistData.operationTitle);
                     }
@@ -1037,9 +1036,7 @@ const useChat = ({
     return new Promise(async (resolve, reject) => {
       try {
         const isManualModeMessage = text.includes("Manual checklist configuration enabled");
-        const isCompletion = isCompletionMessage(text);
-        
-        // Prevent duplicate completion messages in TTS
+        const isCompletion = isCompletionMessage(text);        
         if (isCompletion && !text.includes("Well done")) {
           //console.log("Skipping LLM checklist completion TTS (handled separately):", text.slice(0, 50) + "...");
           resolve();
@@ -1066,6 +1063,7 @@ const useChat = ({
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
           stopRecording();
         }
+        
         stopAllTTS();
         isPlayingTTSRef.current = true;
         currentTTSMessageIndexRef.current = messageIndex; 
@@ -1080,7 +1078,7 @@ const useChat = ({
           console.warn(`TTS API error: ${audioResponse.status} ${audioResponse.statusText}`);
           isPlayingTTSRef.current = false;
           currentTTSMessageIndexRef.current = -1;
-          resolve(); // Silently fail TTS but continue
+          resolve();
           return;
         }
 
@@ -1091,7 +1089,7 @@ const useChat = ({
           console.warn("TTS response is not valid JSON:", jsonError);
           isPlayingTTSRef.current = false;
           currentTTSMessageIndexRef.current = -1;
-          resolve(); // Silently fail TTS but continue
+          resolve();
           return;
         }
 
@@ -1099,47 +1097,102 @@ const useChat = ({
 
         if (audioContent) {
           const audio = new Audio(`data:audio/wav;base64,${audioContent}`);
+          
           if (messageIndex !== -1 && messageIndex < currentTTSMessageIndexRef.current) {
             //console.log(`Aborting TTS for message #${messageIndex}, newer message #${currentTTSMessageIndexRef.current} is active`);
             isPlayingTTSRef.current = false;
-            audio.src = '';
-            audio.load();
+            try {
+              audio.src = '';
+              audio.load();
+            } catch (e) {
+              // Ignore cleanup errors
+            }
             resolve();
             return;
           }
 
-          // event listeners to track playback state and resolve promise
+        const handleEnded = () => {
+          //console.log("TTS playback ended");
           isPlayingTTSRef.current = false;
           currentTTSMessageIndexRef.current = -1;
-          audio.src = '';
-          audio.load();
-          audio.remove();
+          try {
+            audio.removeEventListener('ended', handleEnded);
+            audio.removeEventListener('error', handleError);
+            audio.src = '';
+            audio.load();
+            audio.remove();
+          } catch (e) {
+          }
           setTimeout(forceMemoryCleanup, 100);
+          resolve();
+        };
 
+        const handleError = (event) => {
+          console.warn("TTS playback error occurred:", event?.type || 'unknown error');
+          isPlayingTTSRef.current = false;
+          currentTTSMessageIndexRef.current = -1;
+          try {
+            audio.removeEventListener('ended', handleEnded);
+            audio.removeEventListener('error', handleError);
+            audio.src = '';
+            audio.load();
+            audio.remove();
+          } catch (e) {
+          }
+          // Don't reject audio errors, just resolve to continue
+          resolve();
+        };
+
+        audio.addEventListener('ended', handleEnded);
+        audio.addEventListener('error', handleError);
+
+        try {
           const playPromise = audio.play();
-
           if (playPromise !== undefined) {
-            await playPromise.catch((error) => {
-              //console.log("Audio playback required user interaction first:", error);
+            await playPromise.catch((playError) => {
+              console.warn("Audio playback required user interaction:", playError?.message || 'unknown error');
               isPlayingTTSRef.current = false;
               currentTTSMessageIndexRef.current = -1;
-              reject(error);
+              try {
+                audio.removeEventListener('ended', handleEnded);
+                audio.removeEventListener('error', handleError);
+                audio.src = '';
+                audio.load();
+                audio.remove();
+              } catch (e) {
+                // Ignore cleanup errors
+              }
+              resolve();
             });
           }
-          
-        } else {
+        } catch (playError) {
+          console.warn("Error calling audio.play():", playError?.message || 'unknown error');
           isPlayingTTSRef.current = false;
           currentTTSMessageIndexRef.current = -1;
+          try {
+            audio.removeEventListener('ended', handleEnded);
+            audio.removeEventListener('error', handleError);
+            audio.src = '';
+            audio.load();
+            audio.remove();
+          } catch (e) {
+          }
           resolve();
         }
-      } catch (error) {
-        console.error("Error in text-to-speech:", error);
+        
+      } else {
         isPlayingTTSRef.current = false;
         currentTTSMessageIndexRef.current = -1;
-        reject(error);
+        resolve();
       }
-    });
-  };
+    } catch (error) {
+      console.warn("Error in text-to-speech:", error?.message || 'unknown error');
+      isPlayingTTSRef.current = false;
+      currentTTSMessageIndexRef.current = -1;
+      resolve(); // Always resolve to prevent breaking the conversation flow
+    }
+  });
+};
 
   useEffect(() => {
     if (onManualStepCompleted) {
@@ -1153,7 +1206,7 @@ const useChat = ({
             stopRecording();
           }
           
-          const manualMessage = "Manual checklist configuration enabled, speech stops.";
+          const manualMessage = "Manual checklist configuration enabled";
           setMessagesToShow((prev) => [
             ...prev,
             { 
@@ -1169,7 +1222,7 @@ const useChat = ({
             }, 500);
           }
         } else {
-          //console.log("Already in manual mode, ignoring subsequent manual completions");
+          //console.log("Already in manual mode");
         }
       };
       

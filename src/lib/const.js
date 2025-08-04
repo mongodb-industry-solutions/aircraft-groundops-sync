@@ -47,7 +47,7 @@ export const SAMPLE_CONVERSATION = [
   // Manual completion 
   {
     sender: "assistant",
-    text: "Manual checklist configuration enabled, speech stops."
+    text: "Manual checklist configuration enabled"
   },
   {
     sender: "assistant",
