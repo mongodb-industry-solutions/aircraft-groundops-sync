@@ -26,8 +26,9 @@ const speechToTextConfig = {
   enableAutomaticPunctuation: true,
   enableWordConfidence: false,
   enableSpeakerDiarization: false,
-  profanityFilter: true,
+  profanityFilter: false,
   useEnhanced: true,
+  model: "latest_long",
 };
 
 const textToSpeechConfig = {
@@ -41,19 +42,35 @@ export const getSpeechRecognitionStream = (client) => {
   const speechToTextClient = getSpeechToTextClient();
 
   const recognizeStream = speechToTextClient
-    .streamingRecognize({ config: speechToTextConfig, interimResults: true })
+    .streamingRecognize({ 
+      config: speechToTextConfig, 
+      interimResults: true,
+      singleUtterance: false,
+    })
     .on("error", (err) => {
       console.error("Error with Google Cloud Speech-to-Text:", err);
-      client.send(JSON.stringify({ error: "Speech recognition error" }));
+      if (client && client.readyState === 1) { // Check if WebSocket is open
+        client.send(JSON.stringify({ error: "Speech recognition error" }));
+      }
     })
     .on("data", (data) => {
+      if (!data.results || data.results.length === 0) return;
+      
       const transcription = data.results
-        .map((result) => result.alternatives[0].transcript)
+        .map((result) => result.alternatives[0]?.transcript || "")
         .join("\n");
 
-      const isFinal = data.results[0]?.isFinal;
-
-      client.send(JSON.stringify({ text: transcription, final: isFinal }));
+      const isFinal = data.results[0]?.isFinal || false;
+      
+      if (transcription && client && client.readyState === 1) { 
+        client.send(JSON.stringify({ text: transcription, final: isFinal }));
+      }
+    })
+    .on("end", () => {
+      //console.log("Speech recognition stream ended naturally");
+    })
+    .on("close", () => {
+      //console.log("Speech recognition stream closed");
     });
 
   return recognizeStream;
@@ -70,7 +87,6 @@ export async function convertTextToAudio(text) {
 
     const [response] = await textToSpeechClient.synthesizeSpeech(request);
 
-    // Return the audio content in the format that can be played
     return response.audioContent.toString("base64");
   } catch (error) {
     console.error("Error generating speech:", error);

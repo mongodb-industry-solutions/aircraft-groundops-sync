@@ -11,7 +11,17 @@ export async function POST(req, { params }) {
     const database = process.env.DATABASE_NAME;
 
     const { action } = await params;
-    const body = await req.json();
+    
+    let body;
+    try {
+      body = await req.json();
+    } catch (jsonError) {
+      console.error('Error parsing JSON body:', jsonError);
+      return NextResponse.json(
+        { error: "Invalid JSON in request body" },
+        { status: 400 }
+      );
+    }
 
     const {
       collection,
@@ -22,11 +32,12 @@ export async function POST(req, { params }) {
       sort,
       limit,
       pipeline,
+      document,
     } = body;
 
-    if (!collection || (!filter && action !== "aggregate")) {
+    if (!collection || (!filter && action !== "aggregate" && action !== "insertOne")) {
       return NextResponse.json(
-        { message: "Missing required fields: collection, filter/pipeline" },
+        { message: "Missing required fields: collection, filter/pipeline/document" },
         { status: 400 }
       );
     }
@@ -35,8 +46,6 @@ export async function POST(req, { params }) {
     const db = client.db(database);
     const col = db.collection(collection);
 
-    // Transform _id to ObjectId if present in filter or pipeline
-    // TODO: This is a temporary fix, it should be handled using EJSON
     if (filter && filter._id) {
       filter._id = ObjectId.createFromHexString(filter._id);
     }
@@ -52,6 +61,15 @@ export async function POST(req, { params }) {
     let result;
 
     switch (action) {
+      case "insertOne":
+        if (!document) {
+          return NextResponse.json(
+            { message: "Missing required field: document" },
+            { status: 400 }
+          );
+        }
+        result = await col.insertOne(document);
+        break;
       case "findOne":
         result = await col.findOne(filter, { projection });
         break;

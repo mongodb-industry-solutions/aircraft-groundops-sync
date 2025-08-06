@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 const ChatSessionContext = createContext();
 
 export function ChatSessionProvider({ children }) {
-  const sessionId = useRef(uuidv4()); // Keep sessionId stable
+  const sessionId = useRef(uuidv4());
 
   return (
     <ChatSessionContext.Provider value={sessionId.current}>
@@ -15,7 +15,6 @@ export function ChatSessionProvider({ children }) {
   );
 }
 
-// Custom hook to access sessionId
 export function useChatSession() {
   return useContext(ChatSessionContext);
 }

@@ -1,0 +1,82 @@
+{
+  "aircraft_ground_ops": {
+    "outbound_operations": {
+      "pre_departure": {
+        "prior": [
+          { " order": 1, "step": "Ramp/apron clear of FOD, ice, snow or spills" },
+          { " order": 2, "step": "All non-essential staff behind ERA; wing-walkers assigned when required" },
+          { " order": 3, "step": "Interphone link with flight deck established; marshalling-only backup agreed" },
+          { " order": 4, "step": "If ASU needed, brief crew on hose side and engine-start sequence" },
+          { " order": 5, "step": "Brake-system pressure within limits; essential electrical buses energised" }
+        ],
+        "checklist": [
+          { " order": 1, "step": "GSE and passenger stairs detached; stand clear of obstructions" },
+          { " order": 2, "step": "Adequate clearance from fixed obstacles along aircraft path" },
+          { " order": 3, "step": "All servicing panels/hatches closed and secured (except external power/headset)" },
+          { " order": 4, "step": "Cabin and cargo-door handles flush; no visible damage or leaks" },
+          { " order": 5, "step": "Landing-gear safety pins removed; tyres and struts serviceable" },
+          { " order": 6, "step": "Confirm aircraft parking brake SET via interphone" },
+          { " order": 7, "step": "Verify tow-tractor secured to nose-gear" },
+          { " order": 8, "step": "Remove main-gear chocks on command; leave others until departure" },
+          { " order": 9, "step": "Ensure personnel clear of danger zones; ASU positioned opposite start engine" },
+          { " order": 10, "step": "Coordinate engine-start sequence with flight crew; supply air on request" },
+          { " order": 11, "step": "Transmit \"Ramp clear – ready for push\" and await cockpit acknowledgement" }
+        ],
+        "response_interval": 5,
+        "second_message": "Do you need more time to complete this step?"
+      },
+      "pushback_prep": {
+        "prior": [
+          { "order": 1, "step": "Brake-accumulator pressure ≥ minimum; anti-collision beacon ON" },
+          { "order": 2, "step": "Nose and main-gear ground-lock pins fitted; do not tow if NLG shock > 11.5 in / gauge inserts freely" },
+          { "order": 3, "step": "Gear safety pins installed unless immediate flight pushback" },
+          { "order": 4, "step": "Qualified brake operator on flight deck; interphone tested and clear" },
+          { "order": 5, "step": "Tractor driver briefed: max 5 km h during push; steering-angle limits" }
+        ],
+        "checklist": [
+          { "order": 1, "step": "Set aircraft parking brake and confirm interphone connection" },
+          { "order": 2, "step": "Insert bypass pin; connect tow-bar (aircraft end first) or engage tow-bar-less tractor" },
+          { "order": 3, "step": "If TL-tractor, ensure main-gear symmetrically chocked before lift" },
+          { "order": 4, "step": "Energise aircraft bus bars; BEACON + NAV lights ON; verify brake pressure available" },
+          { "order": 5, "step": "Remove all remaining chocks when instructed; confirm \"Chocks removed\"" },
+          { "order": 6, "step": "Re-confirm interphone clarity; standard phraseology only (\"STOP PUSHBACK\" for emergency)" }
+        ],
+        "response_interval": 5,
+        "second_message": "Do you need more time to complete this step?",
+      },
+      "pushback_pull_forward": {
+        "prior": [
+          { "order": 1, "step": "Cockpit clearance \"CLEAR TO PUSH\" received" },
+          { "order": 2, "step": "Tug aligned on centre-line; tow-bar wheels raised; observers at wing-tips/tail" },
+          { "order": 3, "step": "All crew briefed on speed ≤ 5 mph and 50 m stop rule" }
+        ],
+        "checklist": [
+          { "order": 1, "step": "Start roll – tug moves straight ≤ 5 mph, smooth braking" },
+          { "order": 2, "step": "Manoeuvre – obey wing-walker signals; stay within steering-angle limits; avoid tyre scrubbing" },
+          { "order": 3, "step": "Comms – headset announces \"Pushback starting\"; maintain continuous interphone" },
+          { "order": 4, "step": "Pull-forward (if required) – final metres straight to unload nose-gear torsion" },
+          { "order": 5, "step": "Stop – tug brakes ON; headset: \"BRAKES SET\"; flight crew sets aircraft parking brake" }
+        ],
+        "response_interval": 5,
+        "second_message": "Do you need more time to complete this step?"
+      },
+      "towing_completion": {
+        "prior": [
+          { "order": 1, "step": "Aircraft parking brake SET; main-gear chocks in place; tractor brake set" },
+          { "order": 2, "step": "Tower or ground control advised \"Towing completed\" as required" }
+        ],
+        "checklist": [
+          { "order": 1, "step": "Tractor driver sets parking brake; requests aircraft brake-set" },
+          { "order": 2, "step": "Brake operator sets aircraft parking brake, checks pressure; reports \"PARKING BRAKE SET – PRESSURE CHECKED\"" },
+          { "order": 3, "step": "Ground crew chock main landing-gear; switch off external & anti-collision lights; report \"AIRCRAFT CHOCKED\"" },
+          { "order": 4, "step": "Disconnect tow-bar / TL-tractor and remove bypass pin after permission; report \"TOWBAR/TRACTOR DISCONNECTED\"" },
+          { "order": 5, "step": "Brake operator releases parking brake once stabilised; confirm \"PARKING BRAKE OFF – AIRCRAFT STABILIZED\"" },
+          { "order": 6, "step": "GPU re-connected or tug GPU shut down as directed" },
+          { "order": 7, "step": "Remove and stow all gear-safety pins; tow team clears ERA" }
+        ],
+        "response_interval": 5,
+        "second_message": "Do you need more time to complete this step?",
+      }
+    }
+  }
+}

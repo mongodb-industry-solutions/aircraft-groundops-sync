@@ -22,7 +22,7 @@ const generativeModel = vertexAI.getGenerativeModel({
   systemInstruction: {
     role: "system",
     parts: [
-      { text: "You are a helpful AI assistant for a car infotainment system." },
+      { text: "You are a helpful AI assistant for an airport ground operations system for predeparture, pushback, and towing." },
     ],
   },
 });

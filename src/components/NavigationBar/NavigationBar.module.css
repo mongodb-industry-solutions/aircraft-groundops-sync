@@ -1,0 +1,45 @@
+.navbar {
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding-right: 30px;
+  }
+  
+  .brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .linkContainer {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .link {
+    text-decoration: none;
+    color: black;
+    font-weight: 500;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .link:hover {
+    color: #00684A;
+  }
+
+  .active {
+    color: #00684A;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  .logoContainer {
+    margin-left: 1%;
+  }

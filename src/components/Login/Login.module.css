@@ -1,0 +1,97 @@
+.modalCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.leafyFeel :global(.modal-content) {
+    border-radius: 24px;
+}
+
+.centerText {
+    text-align: center;
+}
+
+.weightNormal {
+    font-weight: normal;
+}
+
+.usersContainer {
+    display: grid;
+    column-gap: 10px;
+    row-gap: 15px;
+    justify-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(105px, 130px));
+    justify-content: space-evenly;
+    margin: 30px 0px 20px 0px;
+}
+
+.descriptionModal {
+    font-size: 14px;
+    display: center;
+    text-align: center;
+}
+
+.customRow {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.modalMainContent {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.disabledCloseButton {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.parentContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+}
+
+.customModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 32, 34, 0.65);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.customModalBox {
+    width: 55%;
+    height: 80%;
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+    overflow: auto;
+}
+
+@media (max-width: 768px) {
+
+    .leafyFeel :global(.modal-content) {
+        border-radius: 0px;
+    }
+
+    .customModalBox {
+        width: 98vw;
+        height: 98vh;
+        border-radius: 0;
+    }
+}

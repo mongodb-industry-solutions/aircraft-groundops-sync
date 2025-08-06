@@ -1,27 +1,48 @@
-
-
 .page {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   height: 100vh;
-  gap: 20px;
+  overflow: hidden;
 }
 
 .header {
   text-align: center;
+  position: relative;
+  width: 100%;
+}
+
+.headerControls {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.backButton {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.backButton:hover {
+  background-color: #e0e0e0;
 }
 
 .openAssistantButton {
   display: flex;
   justify-content: center;
+  gap: 15px;
   margin: 20px 0;
 }
 
 .assistantButton {
   padding: 12px 24px;
-  background-color: #00684A; /* MongoDB green */
+  background-color: #00684A;
   color: white;
   border: none;
   border-radius: 4px;
@@ -33,4 +54,88 @@
 
 .assistantButton:hover {
   background-color: #005A40;
+}
+
+.checklistButton {
+  padding: 12px 24px;
+  background-color: #007c89;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.checklistButton:hover {
+  background-color: #006973;
+}
+
+.completionOptions {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 2px solid #00684A;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-width: 400px;
+  width: 90%;
+}
+
+.completionMessage {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.completionMessage h3 {
+  color: #00684A;
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.completionMessage p {
+  color: #666;
+  margin: 0;
+  font-size: 14px;
+}
+
+.nextSteps {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.nextSteps button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.nextSteps .assistantButton {
+  background-color: #00684A;
+  color: white;
+}
+
+.nextSteps .assistantButton:hover {
+  background-color: #005A40;
+}
+
+.nextSteps .backButton {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.nextSteps .backButton:hover {
+  background-color: #e0e0e0;
 }

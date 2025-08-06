@@ -2,121 +2,168 @@ import React, { useEffect, useRef, useState } from "react";
 import Message from "./message/Message";
 import SuggestedAnswer from "./suggestedAnswer/SuggestedAnswer";
 import styles from "./chatView.module.css";
-import useChatSimulate from "@/hooks/useChatSimulate";
 import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
 import ChatOptions from "./chatOptions/ChatOptions";
 
+const MAX_MESSAGES = 15;
+
 const ChatView = ({
-  setIsRecalculating,
   setCurrentView,
-  simulationMode,
   selectedDevice,
+  selectedOperation,
+  onStepCompleted,
+  onManualStepCompleted,
+  onChecklistCompleted,
+  checklistCompleted = false,
 }) => {
   const chatEndRef = useRef(null);
   const [messagesToShow, setMessagesToShow] = useState([]);
-  const [isTyping, setIsTyping] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
   const [suggestedAnswer, setSuggestedAnswer] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [writerMode, setWriterMode] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
+  const [isManualMode, setIsManualMode] = useState(false);
 
-  const {
-    handleNextMessageSimulate,
-    typeMessageSimulate,
-    startConversationSimulation,
-  } = useChatSimulate({
-    setIsRecalculating,
-    setCurrentView,
-    setMessagesToShow,
-    setIsTyping,
-    setSuggestedAnswer,
-  });
-
-  const { handleLLMResponse, startRecording, stopRecording } = useChat({
-    setIsRecalculating,
+  const { handleLLMResponse, startRecording, stopRecording, stopAllTTS, isPlayingTTS, handleTextToSpeech, getMessagesForDisplay } = useChat({
     setCurrentView,
     setMessagesToShow,
     setIsTyping,
     setIsRecording,
+    isRecording,
     selectedDevice,
     isSpeakerMuted,
+    selectedOperation,
+    onStepCompleted,
+    onManualStepCompleted,
+    onChecklistCompleted,
+    isManualMode,
+    setIsManualMode,
   });
 
-  useEffect(() => {
-    if (simulationMode) {
-      startConversationSimulation();
-    } else {
-      setMessagesToShow([DEFAULT_GREETINGS]);
-      typeMessageSimulate(DEFAULT_GREETINGS, 0);
-    }
-  }, [simulationMode, startConversationSimulation, typeMessageSimulate]);
+  // Filter messages for display
+  const displayMessages = getMessagesForDisplay ? getMessagesForDisplay(messagesToShow) : messagesToShow;
 
-  // Scroll to the bottom when messages update
+  useEffect(() => {
+    if (messagesToShow.length === 0) {
+      setMessagesToShow([DEFAULT_GREETINGS]);
+      setIsTyping(false);
+      setTimeout(() => {
+        if (!isSpeakerMuted) {
+          handleTextToSpeech(DEFAULT_GREETINGS.text);
+        }
+      }, 500);
+    }
+  }, [selectedOperation, messagesToShow.length, isSpeakerMuted, handleTextToSpeech]);
+
+  useEffect(() => {
+    if (checklistCompleted && messagesToShow.length > 0 && !isRecording) {
+      //console.log("Auto-starting recording after checklist completion");
+      setTimeout(() => {
+        if (!isRecording && !isPlayingTTS) {
+          startRecording();
+        }
+      }, 1500);
+    }
+  }, [checklistCompleted, messagesToShow.length, isRecording, isPlayingTTS, startRecording]);
+
+  useEffect(() => {
+  }, [selectedOperation]);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesToShow, suggestedAnswer]);
 
-  const submitMessage = (text) => {
+  // submitMessage for typing mode - use LLM chat to maintain conversation continuity
+  const submitMessage = async (text) => {
+    // Add user message to conversation first
     setMessagesToShow((prev) => {
       const lastMessage = prev[prev.length - 1];
-
-      // If the last message is from the user and is empty, overwrite it
+      let updatedMessages;
       if (lastMessage?.sender === "user" && lastMessage?.text.trim() === "") {
-        return [...prev.slice(0, -1), { sender: "user", text }];
+        updatedMessages = [...prev.slice(0, -1), { sender: "user", text }];
+      } else {
+        updatedMessages = [...prev, { sender: "user", text }];
       }
-
-      // Otherwise, add a new message
-      return [...prev, { sender: "user", text }];
+      // Smart message limiting - prioritize valid messages over failed ones
+      const validMessages = updatedMessages.filter(msg => 
+        msg.text && 
+        msg.text.trim().length > 0 && 
+        !msg.failed && 
+        !msg.typing &&
+        !msg.text.includes("I'm having trouble understanding")
+      );
+      if (validMessages.length > MAX_MESSAGES) {
+        return updatedMessages.slice(-MAX_MESSAGES - 2); // Keep extra for system messages
+      }
+      return updatedMessages;
     });
-
-    handleLLMResponse(text);
+    
+    try {
+      await handleLLMResponse(text);
+    } catch (error) {
+      console.error("Error in submitMessage:", error);
+      setMessagesToShow((prev) => [
+        ...prev,
+        { 
+          sender: "assistant", 
+          text: "I'm having trouble processing that. Could you please say 'done' when you've completed the step, or let me know if you'd prefer to use the manual checklist?",
+          failed: true
+        }
+      ]);
+    }
   };
 
-  // Stop recording automatically after the LLM response is sent
   useEffect(() => {
-    if (!simulationMode && !isTyping && !isRecording && !writerMode) {
-      startRecording();
+    if (!isTyping && !isRecording && !writerMode && !isManualMode && messagesToShow.length > 0) {
+      
+      const checkTTSAndStartRecording = () => {
+        const isTTSPlaying = isPlayingTTS ? isPlayingTTS() : false;
+        
+        if (isTTSPlaying) {
+          setTimeout(checkTTSAndStartRecording, 500);
+        } else {
+          setTimeout(() => {
+            if (!isTyping && !isRecording && !writerMode && !isManualMode) {
+              startRecording();
+            }
+          }, 500); // half second delay after text to speech ends 
+        }
+      };
+      
+      const timer = setTimeout(checkTTSAndStartRecording, 1000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isTyping, simulationMode]);
+  }, [isTyping, isRecording, writerMode, isManualMode, messagesToShow.length, isPlayingTTS, startRecording]);
 
   return (
     <div className={styles.chatViewContainer}>
-      {/* Scrollable chat messages */}
-      <div className={styles.conversationContainer}>
-        {messagesToShow.map((msg, index) => (
+      <div className={`${styles.conversationContainer} ${selectedOperation ? styles.checklistContext : ''}`}>
+        {displayMessages.map((msg, index) => (
           <Message
             key={index}
             message={msg}
             isRecording={isRecording}
-            isLastMessage={index === messagesToShow.length - 1}
+            isLastMessage={index === displayMessages.length - 1}
+            isFirstMessage={index === 0}
           />
         ))}
         <div ref={chatEndRef} />
       </div>
 
-      {!simulationMode ? (
-        <ChatOptions
-          isSpeakerMuted={isSpeakerMuted}
-          setIsSpeakerMuted={setIsSpeakerMuted}
-          writerMode={writerMode}
-          setWriterMode={setWriterMode}
-          isRecording={isRecording}
-          startRecording={startRecording}
-          stopRecording={stopRecording}
-          isTyping={isTyping}
-          submitMessage={submitMessage}
-        />
-      ) : (
-        <SuggestedAnswer
-          suggestedAnswer={suggestedAnswer}
-          isTyping={isTyping}
-          onSuggestionClick={() => {
-            setSuggestedAnswer(null);
-            handleNextMessageSimulate();
-          }}
-        />
-      )}
+      <ChatOptions
+        isSpeakerMuted={isSpeakerMuted}
+        setIsSpeakerMuted={setIsSpeakerMuted}
+        writerMode={writerMode}
+        setWriterMode={setWriterMode}
+        isRecording={isRecording}
+        startRecording={startRecording}
+        stopRecording={stopRecording}
+        isTyping={isTyping}
+        submitMessage={submitMessage}
+      />
     </div>
   );
 };

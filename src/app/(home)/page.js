@@ -1,61 +1,91 @@
 "use client";
 
 import styles from "./page.module.css";
-import { MongoDBLogo } from "@leafygreen-ui/logo";
 import { useState } from "react";
-import { H1 } from "@leafygreen-ui/typography";
-import ChatView from "@/components/chatView/ChatView";
-import InfoWizard from "@/components/infoWizard/InfoWizard";
-import LogConsole from "@/components/logConsole/LogConsole";
-import { TALK_TRACK } from "@/lib/const";
+import InfoWizard from "@/components/InfoWizard/InfoWizard";
+//import LogConsole from "@/components/logConsole/LogConsole";
+import OutboundOps from "@/components/OutboundOps/OutboundOps";
+import Checklist from "@/components/Checklist/checklist";
+import "../fonts.css";
+import dynamic from "next/dynamic";
+
+const Login = dynamic(() => import("@/components/Login/Login"), { ssr: false });
 
 export default function Home() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [simulationMode, setSimulationMode] = useState(false);
+  const [userSelected, setUserSelected] = useState(false);
+  const [operationSelected, setOperationSelected] = useState(false);
+  const [selectedOperation, setSelectedOperation] = useState(null);
   const [openHelpModal, setOpenHelpModal] = useState(false);
-  const [isRecalculating, setIsRecalculating] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState(null);
-  const [currentView, setCurrentView] = useState("navigation");
-  const [showChatView, setShowChatView] = useState(false);
+  const [checklistCompleted, setChecklistCompleted] = useState(false);
+
+  const handleUserSelected = () => {
+    setUserSelected(true);
+  };
+
+  const handleOperationSelected = (operation) => {
+    setSelectedOperation(operation);
+    setOperationSelected(true);
+    setChecklistCompleted(false); // Reset completion state for new operation
+  };
+
+  const handleChecklistCompleted = (operationTitle) => {
+    //console.log(`Manual checklist completed for: ${operationTitle}`);
+    setChecklistCompleted(true);
+  };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <MongoDBLogo />
-        <H1>Aircraft Ground Operations</H1>
-      </div>
-      <InfoWizard
-        open={openHelpModal}
-        setOpen={setOpenHelpModal}
-        tooltipText="Tell me more!"
-        iconGlyph="Wizard"
-        sections={TALK_TRACK}
-      />
-
-      {!showChatView ? (
-        <div className={styles.openAssistantButton}>
-          <button
-            onClick={() => setShowChatView(true)}
-            className={styles.assistantButton}
-          >
-            Open Assistant
-          </button>
-        </div>
-      ) : (
-        <ChatView
-          setIsRecalculating={setIsRecalculating}
-          setCurrentView={(view) => {
-            setCurrentView(view);
-            if (view === "navigation") {
-              setShowChatView(false);
-            }
-          }}
-          simulationMode={simulationMode}
-          selectedDevice={selectedDevice}
-        />
+    <>
+      {!userSelected && <Login onUserSelected={handleUserSelected} />}
+      {userSelected && !operationSelected && (
+        <OutboundOps onOperationSelected={handleOperationSelected} />
       )}
+      {userSelected && operationSelected && (
+        <div className={styles.page}>
+          <InfoWizard
+            open={openHelpModal}
+            setOpen={setOpenHelpModal}
+            tooltipText="Tell me more!"
+            iconGlyph="Wizard"
+          />
 
-      <LogConsole simulationMode={simulationMode} />
-    </div>
+          <Checklist
+            selectedOperation={selectedOperation}
+            onBack={() => {
+              setOperationSelected(false);
+              setSelectedOperation(null);
+              setChecklistCompleted(false);
+            }}
+            onManualStepCompleted={(stepNumber, stepText) => {
+              //console.log(`Manual step completed: ${stepNumber} - ${stepText}`);
+            }}
+            onChecklistCompleted={handleChecklistCompleted}
+          />
+          {checklistCompleted && (
+            <div className={styles.completionOptions}>
+              <div className={styles.completionMessage}>
+                <h3>Checklist Complete! 🎉</h3>
+                <p>
+                  Great job! Your checklist has been completed successfully.
+                </p>
+              </div>
+              <div className={styles.nextSteps}>
+                <button
+                  onClick={() => {
+                    setOperationSelected(false);
+                    setSelectedOperation(null);
+                    setChecklistCompleted(false);
+                  }}
+                  className={styles.backButton}
+                >
+                  Back to Main Menu
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* <LogConsole simulationMode={false} /> */}
+        </div>
+      )}
+    </>
   );
 }

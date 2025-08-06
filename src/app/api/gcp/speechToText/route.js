@@ -1,16 +1,37 @@
 import { getSpeechRecognitionStream } from "@/lib/speech";
 
+// HTTP GET method for route validation
+export function GET() {
+  return new Response("WebSocket endpoint for speech recognition", { 
+    status: 200,
+    headers: { 'Content-Type': 'text/plain' }
+  });
+}
+
 export function SOCKET(client, request, server) {
-  console.log("Client connected");
+  //console.log("Client connected");
 
-  // Creating the Google Cloud Speech-to-Text recognition stream
   let recognizeStream = null;
+  let isStreamActive = false;
 
-  // Start the recognition stream when the first message is received
   client.on("message", async (audioChunk) => {
-    if (!recognizeStream) {
+    if (!recognizeStream || !isStreamActive) {
       try {
         recognizeStream = getSpeechRecognitionStream(client);
+        isStreamActive = true;
+        
+        recognizeStream.on('error', (error) => {
+          console.error("Recognition stream error:", error);
+          isStreamActive = false;
+          recognizeStream = null;
+        });
+        
+        recognizeStream.on('end', () => {
+          //console.log("Recognition stream ended");
+          isStreamActive = false;
+          recognizeStream = null;
+        });
+        
       } catch (error) {
         console.error("Error starting recognition stream:", error);
         client.send(
@@ -20,20 +41,29 @@ export function SOCKET(client, request, server) {
       }
     }
 
-    // Stream the audio data to Google Cloud
-    try {
-      recognizeStream.write(audioChunk);
-    } catch (err) {
-      console.error("Error streaming audio data:", err);
+    // Stream the audio data to Google Cloud only if stream is active
+    if (recognizeStream && isStreamActive) {
+      try {
+        recognizeStream.write(audioChunk);
+      } catch (err) {
+        console.error("Error streaming audio data:", err);
+        isStreamActive = false;
+        recognizeStream = null;
+      }
     }
   });
 
-  // Close the recognition stream when the WebSocket connection is closed
+  // Close the recognition stream when the WebSocket is done
   client.on("close", () => {
-    console.log("Client disconnected");
-    if (recognizeStream) {
-      recognizeStream.end();
+    //console.log("Client disconnected");
+    if (recognizeStream && isStreamActive) {
+      try {
+        recognizeStream.end();
+      } catch (err) {
+        console.error("Error ending recognition stream:", err);
+      }
       recognizeStream = null;
+      isStreamActive = false;
     }
   });
 }
