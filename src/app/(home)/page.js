@@ -2,7 +2,7 @@
 
 import styles from "./page.module.css";
 import { useState } from "react";
-import InfoWizard from "@/components/infoWizard/InfoWizard";
+import InfoWizard from "@/components/InfoWizard/InfoWizard";
 //import LogConsole from "@/components/logConsole/LogConsole";
 import OutboundOps from "@/components/OutboundOps/OutboundOps";
 import Checklist from "@/components/Checklist/checklist";
