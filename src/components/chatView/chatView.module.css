@@ -17,7 +17,6 @@
   scrollbar-color: #888 rgba(237, 237, 237, 0.5);
   display: flex;
   flex-direction: column;
-  scroll-behavior: smooth;
   gap: 10px;
   min-height: 0;
   max-height: 100%;

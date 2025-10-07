@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { useChatSession } from "@/context/ChatSessionContext";
-import { dtcCodesDictionary } from "@/lib/const";
+//import { dtcCodesDictionary } from "@/lib/const";
 
 const useChat = ({
   setCurrentView,
@@ -123,9 +123,19 @@ const useChat = ({
     if (setIsManualMode) {
       setIsManualMode(false);
     }
-    setGreetingSent(false);
     setChecklistCompletionSent(false);
-    //console.log("Reset greeting and checklist completion state for new operation");    
+    
+    // Check if we need to reset greeting state based on current messages
+    setMessagesToShow((currentMessages) => {
+      if (currentMessages.length > 1) {
+        // If we have more than just a greeting, mark greeting as sent to prevent duplicates
+        setGreetingSent(true);
+      } else {
+        setGreetingSent(false);
+      }
+      return currentMessages;
+    });
+    //console.log("Reset checklist completion state for new operation");    
     return () => {
       //console.log("Cleaning up useChat hook resources");
       try {
@@ -738,7 +748,10 @@ const useChat = ({
     
     // Check for greeting duplication
     const isGreeting = isGreetingMessage(content);
-    if (isGreeting && greetingSent) {
+    const hasExistingMessages = typeof setMessagesToShow === 'function' && 
+      (typeof window !== 'undefined' && window.currentMessagesLength > 1); // We'll track this via callback
+    
+    if (isGreeting && greetingSent && hasExistingMessages) {
       //console.log("Skipping repeated greeting in replyDirectToUser:", content.slice(0, 50) + "...");
       return;
     }
@@ -754,6 +767,10 @@ const useChat = ({
         text: content,
         source: functionName 
       }];
+      // Track current message count globally for greeting logic
+      if (typeof window !== 'undefined') {
+        window.currentMessagesLength = updatedMessages.length;
+      }
       const validMessages = getValidMessages(updatedMessages);
       if (validMessages.length > MAX_MESSAGES) {
         return updatedMessages.slice(-MAX_MESSAGES - 2);
