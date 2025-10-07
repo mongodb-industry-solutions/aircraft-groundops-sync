@@ -18,6 +18,7 @@ const ChatView = ({
   checklistCompleted = false,
 }) => {
   const chatEndRef = useRef(null);
+  const conversationContainerRef = useRef(null);
   const [messagesToShow, setMessagesToShow] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [suggestedAnswer, setSuggestedAnswer] = useState(null);
@@ -25,6 +26,9 @@ const ChatView = ({
   const [writerMode, setWriterMode] = useState(false);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
+  const [hasInitializedGreeting, setHasInitializedGreeting] = useState(false);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
 
   const { handleLLMResponse, startRecording, stopRecording, stopAllTTS, isPlayingTTS, handleTextToSpeech, getMessagesForDisplay } = useChat({
     setCurrentView,
@@ -45,17 +49,51 @@ const ChatView = ({
   // Filter messages for display
   const displayMessages = getMessagesForDisplay ? getMessagesForDisplay(messagesToShow) : messagesToShow;
 
+  const isNearBottom = () => {
+    if (!conversationContainerRef.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = conversationContainerRef.current;
+    const threshold = 100; // pixels from bottom
+    return scrollHeight - scrollTop - clientHeight < threshold;
+  };
+
+  const handleScroll = () => {
+    if (!conversationContainerRef.current) return;
+    
+    const wasNearBottom = isNearBottom();
+    
+    if (!wasNearBottom && autoScrollEnabled) {
+      setAutoScrollEnabled(false);
+      setIsUserScrolling(true);
+    } else if (wasNearBottom && !autoScrollEnabled) {
+      setAutoScrollEnabled(true);
+      setIsUserScrolling(false);
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (autoScrollEnabled && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "auto" });
+    }
+  };
+
   useEffect(() => {
-    if (messagesToShow.length === 0) {
+    // Only initialize greeting once per operation and if no messages exist
+    if (messagesToShow.length === 0 && !hasInitializedGreeting) {
       setMessagesToShow([DEFAULT_GREETINGS]);
       setIsTyping(false);
+      setHasInitializedGreeting(true);
       setTimeout(() => {
         if (!isSpeakerMuted) {
           handleTextToSpeech(DEFAULT_GREETINGS.text);
         }
       }, 500);
     }
-  }, [selectedOperation, messagesToShow.length, isSpeakerMuted, handleTextToSpeech]);
+  }, [selectedOperation, messagesToShow.length, isSpeakerMuted, handleTextToSpeech, hasInitializedGreeting]);
+
+  // Reset greeting state when operation changes
+  useEffect(() => {
+    setHasInitializedGreeting(false);
+  }, [selectedOperation]);
 
   useEffect(() => {
     if (checklistCompleted && messagesToShow.length > 0 && !isRecording) {
@@ -72,8 +110,15 @@ const ChatView = ({
   }, [selectedOperation]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messagesToShow, suggestedAnswer]);
+    if (autoScrollEnabled && messagesToShow.length > 1 && isNearBottom()) {
+      scrollToBottom();
+    }
+  }, [messagesToShow, suggestedAnswer, autoScrollEnabled]);
+
+  useEffect(() => {
+    setAutoScrollEnabled(false);
+    setIsUserScrolling(false);
+  }, [selectedOperation]);
 
   // submitMessage for typing mode - use LLM chat to maintain conversation continuity
   const submitMessage = async (text) => {
@@ -116,7 +161,7 @@ const ChatView = ({
   };
 
   useEffect(() => {
-    if (!isTyping && !isRecording && !writerMode && !isManualMode && messagesToShow.length > 0) {
+    if (!isTyping && !isRecording && !writerMode && !isManualMode && messagesToShow.length > 0 && hasInitializedGreeting) {
       
       const checkTTSAndStartRecording = () => {
         const isTTSPlaying = isPlayingTTS ? isPlayingTTS() : false;
@@ -136,11 +181,15 @@ const ChatView = ({
       
       return () => clearTimeout(timer);
     }
-  }, [isTyping, isRecording, writerMode, isManualMode, messagesToShow.length, isPlayingTTS, startRecording]);
+  }, [isTyping, isRecording, writerMode, isManualMode, messagesToShow.length, isPlayingTTS, startRecording, hasInitializedGreeting]);
 
   return (
     <div className={styles.chatViewContainer}>
-      <div className={`${styles.conversationContainer} ${selectedOperation ? styles.checklistContext : ''}`}>
+      <div 
+        ref={conversationContainerRef}
+        className={`${styles.conversationContainer} ${selectedOperation ? styles.checklistContext : ''}`}
+        onScroll={handleScroll}
+      >
         {displayMessages.map((msg, index) => (
           <Message
             key={index}
