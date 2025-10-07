@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Message from "./message/Message";
-import SuggestedAnswer from "./suggestedAnswer/SuggestedAnswer";
+//import SuggestedAnswer from "./suggestedAnswer/SuggestedAnswer";
 import styles from "./chatView.module.css";
 import useChat from "@/hooks/useChat";
 import { DEFAULT_GREETINGS } from "@/lib/const";
