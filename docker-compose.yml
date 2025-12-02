@@ -1,10 +1,16 @@
+version: "3"
 services:
   aircraft-ground-ops:
     build:
       context: ./
-      dockerfile: Dockerfile 
-    image: aircraft-ground-ops:latest
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     restart: always
     container_name: aircraft-ground-ops
+    volumes:
+      - ~/.config/gcloud/application_default_credentials.json:/home/nextjs/.config/gcloud/application_default_credentials.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/home/nextjs/.config/gcloud/application_default_credentials.json
