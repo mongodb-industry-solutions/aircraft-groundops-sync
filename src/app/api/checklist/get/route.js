@@ -13,7 +13,7 @@ export async function POST(request) {
     }
 
     const client = await clientPromise;
-    const databaseName = client.db(process.env.DATABASE_NAME);
+    const databaseName = process.env.DATABASE_NAME;
 
     if (!databaseName) {
       console.error('DATABASE_NAME environment variable is not set');
