@@ -13,7 +13,16 @@ export async function POST(request) {
     }
 
     const client = await clientPromise;
-    const db = client.db(process.env.DATABASE_NAME);
+    const databaseName = client.db(process.env.DATABASE_NAME);
+
+    if (!databaseName) {
+      console.error('DATABASE_NAME environment variable is not set');
+      return NextResponse.json(
+        { error: 'Database configuration error' },
+        { status: 500 }
+      );
+    }
+    const db = client.db(databaseName);
     const checklistCollection = db.collection('checklist');
 
     const checklistData = await checklistCollection.findOne({
