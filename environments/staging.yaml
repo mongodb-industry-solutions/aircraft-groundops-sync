@@ -1,3 +1,12 @@
+env:
+  NODE_ENV: production
+  NEXT_PUBLIC_ENV: staging
+  GCP_PROJECT_ID: manufacturing-project-425012
+  GCP_LOCATION: us-central1
+  VERTEXAI_COMPLETIONS_MODEL: gemini-2.0-flash-001
+  VERTEXAI_EMBEDDINGS_MODEL: text-embedding-005
+  VERTEXAI_API_ENDPOINT: us-central1-aiplatform.googleapis.com
+
 # Secret environment variables (references to K8s secrets)
 envSecrets:
   MONGODB_URI: aircraft-ground-ops
