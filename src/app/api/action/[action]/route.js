@@ -11,20 +11,19 @@ export async function POST(req, { params }) {
         { status: 400 }
       );
     }
-    
+
     if (!process.env.DATABASE_NAME) {
       throw new Error('Invalid/Missing environment variable: "DATABASE_NAME"');
     }
 
     const database = process.env.DATABASE_NAME;
 
-    const { action } = await params;
+    const { action } = params;
     
-    let body;
+    let body = {}; 
     try {
       body = await req.json();
     } catch (jsonError) {
-      console.error('Error parsing JSON body:', jsonError);
       return NextResponse.json(
         { error: "Invalid JSON in request body" },
         { status: 400 }
