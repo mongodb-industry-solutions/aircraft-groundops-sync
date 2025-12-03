@@ -4,6 +4,14 @@ import { ObjectId } from "mongodb";
 
 export async function POST(req, { params }) {
   try {
+
+    if (!params || !params.action) {
+      return NextResponse.json(
+        { message: "Action parameter is missing" },
+        { status: 400 }
+      );
+    }
+    
     if (!process.env.DATABASE_NAME) {
       throw new Error('Invalid/Missing environment variable: "DATABASE_NAME"');
     }
