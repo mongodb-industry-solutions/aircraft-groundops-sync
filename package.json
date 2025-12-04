@@ -10,9 +10,9 @@
     "prepare": "next-ws patch"
   },
   "dependencies": {
-    "@google-cloud/aiplatform": "^5.1.0",
-    "@google-cloud/speech": "^7.2.0",
-    "@google-cloud/text-to-speech": "^6.2.0",
+    "@google-cloud/aiplatform": "^5.14.0",
+    "@google-cloud/speech": "^7.2.1",
+    "@google-cloud/text-to-speech": "^6.4.0",
     "@google-cloud/vertexai": "^1.10.0",
     "@journeyapps/wa-sqlite": "^1.2.6",
     "@leafygreen-ui/badge": "^9.0.10",
