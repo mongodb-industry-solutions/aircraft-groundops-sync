@@ -64,3 +64,6 @@ venv.bak/
 security_check.sh
 SECURITY_CHECK_README.md
 .security-check/
+
+# docker ignore
+.dockerignore
