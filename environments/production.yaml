@@ -9,8 +9,9 @@ env:
 envSecrets:
   MONGODB_URI: aircraft-ground-ops
   DATABASE_NAME: aircraft-ground-ops
-  AWS_REGION: aircraft-ground-ops
-  AWS_PROFILE: aircraft-ground-ops
+  DATAWORKZ_API_KEY: aircraft-ground-ops
+  DATAWORKZ_SYSTEM_ID: aircraft-ground-ops
+  DATAWORKZ_LLM_PROVIDER_ID: aircraft-ground-ops
   COMPLETION_MODEL: aircraft-ground-ops
   EMBEDDING_MODEL: aircraft-ground-ops
   NEXT_PUBLIC_ENV: aircraft-ground-ops
