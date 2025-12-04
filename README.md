@@ -33,7 +33,7 @@ npm install
 Create a `.env.local` file with the following variables:
 
 ```
-MONGODB_URI="<your-mongodb-connection-string>"
+MONGODB_URI="<your-mongodb-connection-string> "
 DATABASE_NAME="ground_ops_demo"
 DATAWORKZ_API_KEY="your_api_key"
 DATAWORKZ_SYSTEM_ID="your_system_id"
