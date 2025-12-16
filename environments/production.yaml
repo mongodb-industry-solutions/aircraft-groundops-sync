@@ -1,0 +1,39 @@
+env:
+  NODE_ENV: production
+  GCP_PROJECT_ID: manufacturing-project-425012
+  GCP_LOCATION: us-central1
+  GOOGLE_APPLICATION_CREDENTIALS: /etc/gcp/credential-configuration.json
+  VERTEXAI_COMPLETIONS_MODEL: gemini-2.0-flash-001
+  VERTEXAI_EMBEDDINGS_MODEL: text-embedding-005
+  VERTEXAI_API_ENDPOINT: us-central1-aiplatform.googleapis.com
+
+envSecrets:
+  MONGODB_URI: aircraft-ground-ops
+  DATABASE_NAME: aircraft-ground-ops
+  DATAWORKZ_API_KEY: aircraft-ground-ops
+  DATAWORKZ_SYSTEM_ID: aircraft-ground-ops
+  DATAWORKZ_LLM_PROVIDER_ID: aircraft-ground-ops
+
+serviceAccount:
+  enabled: true
+
+# Mount GCP credential config and service account token (PRODUCTION)
+extraVolumes:
+  - name: gcp-creds
+    configMap:
+      name: gcp-wif-config-prod
+  - name: gcp-token
+    projected:
+      sources:
+      - serviceAccountToken:
+          path: token
+          expirationSeconds: 3600
+          audience: "//iam.googleapis.com/projects/362614368442/locations/global/workloadIdentityPools/kanopy-mfg-wif-pool-prod/providers/kanopy-mfg-provider-prod"
+
+extraVolumeMounts:
+  - name: gcp-creds
+    mountPath: /etc/gcp
+    readOnly: true
+  - name: gcp-token
+    mountPath: /var/run/service-account
+    readOnly: true

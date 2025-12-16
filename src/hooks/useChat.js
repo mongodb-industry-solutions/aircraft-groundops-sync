@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useChatSession } from "@/context/ChatSessionContext";
 //import { dtcCodesDictionary } from "@/lib/const";
 
+//Adds comment for redeploy 
 const useChat = ({
   setCurrentView,
   setMessagesToShow,

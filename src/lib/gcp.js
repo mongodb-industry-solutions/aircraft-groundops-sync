@@ -4,7 +4,7 @@ import {
   VertexAI,
 } from "@google-cloud/vertexai";
 
-const project = "manufacturing-project-425012";
+const project = "manufacturing-project-425012"
 const location = "us-central1";
 const model = "gemini-1.0-pro";
 

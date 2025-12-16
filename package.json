@@ -7,12 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "next-ws patch"
+    "prepare": "echo y | next-ws patch"
   },
   "dependencies": {
-    "@google-cloud/aiplatform": "^5.1.0",
-    "@google-cloud/speech": "^7.2.0",
-    "@google-cloud/text-to-speech": "^6.2.0",
+    "@google-cloud/aiplatform": "^5.14.0",
+    "@google-cloud/speech": "^7.2.1",
+    "@google-cloud/text-to-speech": "^6.4.0",
     "@google-cloud/vertexai": "^1.10.0",
     "@journeyapps/wa-sqlite": "^1.2.6",
     "@leafygreen-ui/badge": "^9.0.10",
@@ -34,7 +34,7 @@
     "@leafygreen-ui/typography": "^20.1.9",
     "js-logger": "^1.6.1",
     "mongodb": "^6.18.0",
-    "next": "15.5.7",
+    "next": "15.5.9",
     "next-ws": "^2.0.12",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.10",

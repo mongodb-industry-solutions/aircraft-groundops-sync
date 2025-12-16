@@ -89,7 +89,7 @@ const Checklist = ({ selectedOperation, onBack, onManualStepCompleted, onCheckli
       
       // Check if this was a manual completion 
       if (!prev[itemId]) { 
-        const isMainItem = itemId.startsWith('main_');
+        const isMainItem = itemId?.startsWith('main_');
         if (isMainItem) {
           // Check if this completion was triggered by the assistant
           if (assistantCompletedItems.has(itemId)) {
