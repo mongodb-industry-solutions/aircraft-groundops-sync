@@ -2,6 +2,7 @@ env:
   NODE_ENV: production
   GCP_PROJECT_ID: manufacturing-project-425012
   GCP_LOCATION: us-central1
+  GOOGLE_APPLICATION_CREDENTIALS: /etc/gcp/credential-configuration.json
   VERTEXAI_COMPLETIONS_MODEL: gemini-2.0-flash-001
   VERTEXAI_EMBEDDINGS_MODEL: text-embedding-005
   VERTEXAI_API_ENDPOINT: us-central1-aiplatform.googleapis.com
@@ -15,30 +16,24 @@ envSecrets:
 
 serviceAccount:
   enabled: true
-  irsa:
-    accountId: "275662791714"
-    roleName: "kanopy-prod-cicd-irsa"
-  annotations:
-    iam.gke.io/gcp-service-account: "manufacturing-kanopy-sa@manufacturing-project-425012.iam.gserviceaccount.com"
 
-# Mount GCP credential config and service account token
+# Mount GCP credential config and service account token (PRODUCTION)
 extraVolumes:
- - name: gcp-creds
-   configMap:
-     name: gcp-wif-config
- - name: gcp-token
-   projected:
-     sources:
-     - serviceAccountToken:
-         path: token
-         expirationSeconds: 3600
-         audience: "//iam.googleapis.com/projects/362614368442/locations/global/workloadIdentityPools/kanopy-manufacturing-wif-pool/providers/kanopy-manufacturing-provider"
-
+  - name: gcp-creds
+    configMap:
+      name: gcp-wif-config-prod
+  - name: gcp-token
+    projected:
+      sources:
+      - serviceAccountToken:
+          path: token
+          expirationSeconds: 3600
+          audience: "//iam.googleapis.com/projects/362614368442/locations/global/workloadIdentityPools/kanopy-mfg-wif-pool-prod/providers/kanopy-mfg-provider-prod"
 
 extraVolumeMounts:
- - name: gcp-creds
-   mountPath: /etc/gcp
-   readOnly: true
- - name: gcp-token
-   mountPath: /var/run/service-account
-   readOnly: true
+  - name: gcp-creds
+    mountPath: /etc/gcp
+    readOnly: true
+  - name: gcp-token
+    mountPath: /var/run/service-account
+    readOnly: true
